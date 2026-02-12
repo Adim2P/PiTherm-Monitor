@@ -1,0 +1,7 @@
+venv/
+pycache/
+*.pyc
+.env
+.vscode/
+*.xlsx
+server_room_iot.py
