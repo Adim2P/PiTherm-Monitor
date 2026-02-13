@@ -17,11 +17,14 @@ from src.pitherm.config import (
     SMTP_CC
 )
 
+_last_report_month = None
+
 def build_recipients(primary):
     cc_list = [e.strip() for e in SMTP_CC.split(",")] if SMTP_CC else []
     return primary, cc_list, [primary] + cc_list
 
 def log_to_excel(temp, hum):
+
     date_str = datetime.now().strftime("%Y-%m")
     filename = f"temp_log_{date_str}.xlsx"
 
@@ -38,6 +41,7 @@ def log_to_excel(temp, hum):
     
     now = datetime.now()
     ws.append([now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), temp, hum])
+    wb.save(filename)
 
 def send_montly_report():
     month_str = datetime.now().strftime("%Y-%m")
@@ -80,9 +84,14 @@ def send_montly_report():
         print("[ERROR] Failed to send excel report:", err)
 
 def check_and_send_monthly_report():
+    global _last_report_month
+
     now = datetime.now()
-    if now.day == 1 and now.hour == 7 and now.minute == 0:
-        send_montly_report()
+    current_month = now.strftime("%Y-%m")
+
+    if now.day == 1 and now.hour >= 7 and _last_report_month != current_month:
+            send_montly_report()
+            _last_report_month = current_month
 
 def run_scheduler():
     while True:
