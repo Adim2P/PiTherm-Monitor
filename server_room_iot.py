@@ -27,6 +27,10 @@ from src.pitherm.alert import (
     send_email_alert,
     build_recipients
 )
+from src.pitherm.logging_service import (
+    log_to_excel,
+    start_scheduler
+)
 
 # === Hardware Setup ===
 
@@ -107,7 +111,7 @@ def run_scheduler():
         schedule.run_pending()
         time.sleep(60)
 
-threading.Thread(target=run_scheduler, daemon=True).start()
+start_scheduler()
 
 hardware = HardwareController()
 
