@@ -4,5 +4,4 @@ pycache/
 .env
 .vscode/
 *.xlsx
-server_room_iot.py
 test_config.py
