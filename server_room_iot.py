@@ -1,31 +1,11 @@
 import time
-import requests
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-import smtplib
-import os
-from dotenv import load_dotenv
-from datetime import datetime
-from openpyxl import Workbook, load_workbook
-from openpyxl.utils import get_column_letter
-from openpyxl.styles import Font
-import schedule
-import threading
-import json
 from src.pitherm.config import (
-    THINGSPEAK_API_KEY,
-    SMTP_USER,
-    SMTP_PASS,
-    SMTP_RECIPIENT,
-    SMTP_CC,
     TEMP_THRESHOLD_HIGH,
     TEMP_THRESHOLD_LOW
 )
 from src.pitherm.hardware import HardwareController
 from src.pitherm.alert import (
     send_email_alert,
-    build_recipients
 )
 from src.pitherm.logging_service import (
     log_to_excel,
