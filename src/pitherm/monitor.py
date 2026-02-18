@@ -1,0 +1,71 @@
+import time
+from src.pitherm.config import (
+    TEMP_THRESHOLD_HIGH,
+    TEMP_THRESHOLD_LOW
+)
+from src.pitherm.alert import (
+    send_email_alert
+)
+from src.pitherm.logging_service import log_to_excel
+from src.pitherm.dashboard import send_to_thingspeak
+
+class Monitor:
+    def __init__(self, hardware):
+        self.hardware = hardware
+        self.alert_sent_high = False
+        self.alert_sent_low = False
+    
+    def process_reading(self, temperature, humidity):
+        print(f"[DATA] Temp: {temperature:.1f}°C | Humidity: {humidity:.1f}%")
+
+        self.hardware.update_lcd(temperature, humidity)
+
+        log_to_excel(temperature, humidity)
+        send_to_thingspeak(temperature, humidity)
+
+        if temperature >= TEMP_THRESHOLD_HIGH:
+            print("[DEBUG] High temp alert triggered!")
+            self.hardware.set_led(True)
+
+            if not self.alert_sent_high:
+                send_email_alert(temperature, humidity, alert_type="high")
+
+                self.alert_sent_high = True
+                self.alert_sent_low = False
+        elif temperature <= TEMP_THRESHOLD_LOW:
+            print("[DEBUG] Low temp alert triggered!")
+            self.hardware.set_lcd(True)
+
+            if not self.alert_sent_low:
+                send_email_alert(temperature, humidity, alert_type="low")
+
+                self.alert_send_low = True
+                self.alert_send_high = False
+        else:
+            self.hardware.set_led(False)
+            self.alert_sent_high = False
+            self.alert_send_low = False
+    
+    def run(self):
+        print ("[START] Monitoring Started. Press Ctrl + C to stop.")
+
+        try:
+            while True:
+                try:
+                    temperature, humidity = self.hardware.read_sensor()
+
+                    if temperature is not None and humidity is not None:
+                        self.process_reading(temperature, humidity)
+                    else:
+                        print("[WARN] Sensor read failed.")
+                
+                except RuntimeError as err:
+                    print(f"[ERROR] DHT read error: {err}")
+                
+                time.sleep(30)
+
+        except KeyboardInterrupt:
+            print("\n[STOP] Monitoring stopped by user.")
+
+        finally:
+            self.hardware.cleanup()
