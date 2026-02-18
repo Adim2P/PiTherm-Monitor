@@ -31,20 +31,12 @@ from src.pitherm.logging_service import (
     log_to_excel,
     start_scheduler
 )
+from src.pitherm.dashboard import send_to_thingspeak
 
 # === Hardware Setup ===
 
 alert_sent_high = False
 alert_sent_low = False
-
-def send_to_thingspeak(temp, hum):
-    url = "https://api.thingspeak.com/update"
-    params = {'api_key': THINGSPEAK_API_KEY, 'field1': temp, 'field2': hum}
-    try:
-        r = requests.get(url, params=params)
-        print("[UPLOAD] Data sent to ThingSpeak." if r.status_code == 200 and r.text != '0' else f"[WARN] ThingSpeak error: {r.text}")
-    except Exception as err:
-        print("[ERROR] ThingSpeak exception:", err)
 
 start_scheduler()
 
