@@ -63,7 +63,10 @@ class Monitor:
                     temperature, humidity = self.hardware.read_sensor()
 
                     if temperature is not None and humidity is not None:
-                        self.process_reading(temperature, humidity)
+                        try:
+                            self.process_reading(temperature, humidity)
+                        except Exception as e:
+                            print("[ERROR] Processing failure:", e)
                     else:
                         print("[WARN] Sensor read failed.")
                 
