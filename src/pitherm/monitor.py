@@ -1,7 +1,8 @@
 import time
 from src.pitherm.config import (
     TEMP_THRESHOLD_HIGH,
-    TEMP_THRESHOLD_LOW
+    TEMP_THRESHOLD_LOW,
+    LOG_INTERVAL_SECONDS
 )
 from src.pitherm.alert import (
     send_email_alert
@@ -14,13 +15,19 @@ class Monitor:
         self.hardware = hardware
         self.alert_sent_high = False
         self.alert_sent_low = False
+        self._last_log_time = 0
     
     def process_reading(self, temperature, humidity):
         print(f"[DATA] Temp: {temperature:.1f}°C | Humidity: {humidity:.1f}%")
 
         self.hardware.update_lcd(temperature, humidity)
 
-        log_to_excel(temperature, humidity)
+        current_time = time.time()
+        
+        if current_time - self._last_log_time >= LOG_INTERVAL_SECONDS:
+            log_to_excel(temperature, humidity)
+            self._last_log_time = current_time
+
         send_to_thingspeak(temperature, humidity)
 
         if temperature >= TEMP_THRESHOLD_HIGH:
