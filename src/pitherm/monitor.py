@@ -2,7 +2,8 @@ import time
 from src.pitherm.config import (
     TEMP_THRESHOLD_HIGH,
     TEMP_THRESHOLD_LOW,
-    LOG_INTERVAL_SECONDS
+    LOG_INTERVAL_SECONDS,
+    READ_INTERVAL_SECONDS
 )
 from src.pitherm.alert import (
     send_email_alert
@@ -69,7 +70,7 @@ class Monitor:
                 except RuntimeError as err:
                     print(f"[ERROR] DHT read error: {err}")
                 
-                time.sleep(30)
+                time.sleep(READ_INTERVAL_SECONDS)
 
         except KeyboardInterrupt:
             print("\n[STOP] Monitoring stopped by user.")
