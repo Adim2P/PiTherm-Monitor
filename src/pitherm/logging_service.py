@@ -18,15 +18,16 @@ from src.pitherm.config import (
 )
 
 _last_report_month = None
+_excel_lock = threading.Lock()
 
 def build_recipients(primary):
     cc_list = [e.strip() for e in SMTP_CC.split(",")] if SMTP_CC else []
     return primary, cc_list, [primary] + cc_list
 
 def log_to_excel(temp, hum):
-
-    date_str = datetime.now().strftime("%Y-%m")
-    filename = f"temp_log_{date_str}.xlsx"
+    with _excel_lock:
+        date_str = datetime.now().strftime("%Y-%m")
+        filename = f"temp_log_{date_str}.xlsx"
 
     try:
         wb = load_workbook(filename)
@@ -40,12 +41,18 @@ def log_to_excel(temp, hum):
             ws[f"{get_column_letter(col)}1"].font = Font(bold=True)
     
     now = datetime.now()
-    ws.append([now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), temp, hum])
+    ws.append([
+        now.strftime("%Y-%m-%d"), 
+        now.strftime("%H:%M:%S"), 
+        temp, 
+        hum
+    ])
     wb.save(filename)
 
 def send_montly_report():
-    month_str = datetime.now().strftime("%Y-%m")
-    filename = f"temp_log_{month_str}.xlsx"
+    with _excel_lock:
+        month_str = datetime.now().strftime("%Y-%m")
+        filename = f"temp_log_{month_str}.xlsx"
 
     if not os.path.exists(filename):
         print("[WARN] No Excel File to send.")
