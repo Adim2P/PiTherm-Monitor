@@ -10,7 +10,7 @@ def send_to_thingspeak(temp, hum):
     }
 
     try:
-        r = requests.get(url, params=params)
+        r = requests.get(url, params=params, timeout=5)
         if r.status_code == 200 and r.text !='0':
             print("[UPLOAD] Data sent to ThingSpeak.")
         else:

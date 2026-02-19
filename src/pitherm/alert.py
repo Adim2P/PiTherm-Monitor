@@ -39,7 +39,7 @@ def send_email_alert(temp, hum, alert_type="high"):
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        server = smtplib.SMTP(smtp_host, smtp_port)
+        server = smtplib.SMTP(smtp_host, smtp_port, timeout=5)
         server.starttls()
         server.login(sender, SMTP_PASS)
         server.sendmail(sender, recipients, msg.as_string())
