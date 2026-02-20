@@ -11,17 +11,6 @@ PiTherm Monitor – Internal TODO Roadmap
     - Replace legacy SMS logic
     - Add heartbeat SMS support
 
-[ ] Create structured logging directories:
-        /logs/
-            /current/
-            /archive/
-
-[ ] Save active month logs in /logs/current
-
-[ ] Automatically archive previous month to /logs/archive
-
-[ ] Ensure file operations are thread-safe
-
 [ ] Implement fallback logging (CSV or text)
     - Trigger if Excel write fails
     - Prevent data loss
