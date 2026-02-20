@@ -3,5 +3,4 @@ pycache/
 *.pyc
 .env
 .vscode/
-*.xlsx
-test_config.py
+logs/
