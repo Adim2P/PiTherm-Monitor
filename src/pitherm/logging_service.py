@@ -15,12 +15,39 @@ from src.pitherm.config import (
     SMTP_RECIPIENT,
     SMTP_CC
 )
+import csv
 
 _last_report_month = None
 _excel_lock = threading.Lock()
 BASE_LOG_DIR = "logs"
 CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
 ARCHIVE_DIR = os.path.join(BASE_LOG_DIR, "archive")
+
+def log_to_csv_fallback(temp, hun):
+    ensure_log_directories()
+
+    fallback_file = os.path.join(CURRENT_DIR, "fallback_log.csv")
+    now = datetime.now()
+    file_exists = os.path.exists(fallback_file)
+
+    with open(fallback_file, mode="a", newline="") as file:
+        writer = csv.writer(file)
+
+        if not file_exists:
+            writer.writerow([
+                "Date", 
+                "Time", 
+                "Temperature (°C)", 
+                "Humidity (%)"
+            ])
+
+            writer.writerow([
+                now.strftime("%Y-%m-%d"),
+                now.strftime("%H:%M:%S"),
+                temp,
+                hun
+            ])
+    print("[FALLBACK] Logged reading to CSV.")
 
 def ensure_log_directories():
     os.makedirs(CURRENT_DIR, exist_ok=True)
@@ -56,26 +83,30 @@ def log_to_excel(temp, hum):
 
         date_str = datetime.now().strftime("%Y-%m")
         filename = os.path.join(CURRENT_DIR, f"temp_log_{date_str}.xlsx")
-
-    try:
-        wb = load_workbook(filename)
-        ws = wb.active
-    except FileNotFoundError:
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Monthly Readings"
-        ws.append(["Date", "Time", "Temperature (°C)", "Humidity (%)"])
-        for col in range(1, 5):
-            ws[f"{get_column_letter(col)}1"].font = Font(bold=True)
     
-    now = datetime.now()
-    ws.append([
-        now.strftime("%Y-%m-%d"), 
-        now.strftime("%H:%M:%S"), 
-        temp, 
-        hum
-    ])
-    wb.save(filename)
+    try:
+        try:
+            wb = load_workbook(filename)
+            ws = wb.active
+        except FileNotFoundError:
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Monthly Readings"
+            ws.append(["Date", "Time", "Temperature (°C)", "Humidity (%)"])
+            for col in range(1, 5):
+                ws[f"{get_column_letter(col)}1"].font = Font(bold=True)
+    
+        now = datetime.now()
+        ws.append([
+            now.strftime("%Y-%m-%d"), 
+            now.strftime("%H:%M:%S"), 
+            temp, 
+            hum
+        ])
+        wb.save(filename)
+    except Exception as e:
+        print("[CRITICAL] Excel logging failed. Switching to CSV Fallback.:", e)
+        log_to_csv_fallback(temp, hum)
 
 def send_montly_report():
     with _excel_lock:
