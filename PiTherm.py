@@ -3,10 +3,6 @@
 PiTherm Monitor – Internal TODO Roadmap
 ===========================================================
 
-[ ] Implement hysteresis (anti-flapping thresholds)
-    - High trigger (e.g. 25°C)
-    - Reset only below buffer (e.g. 24°C)
-
 [ ] Rebuild SMS integration (new provider API)
     - Replace legacy SMS logic
     - Add heartbeat SMS support
