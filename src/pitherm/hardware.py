@@ -50,5 +50,5 @@ class HardwareController:
     def cleanup(self):
         if HARDWARE_AVAILABLE:
             self.lcd.clear()
-            GPIO.cleanup
+            GPIO.cleanup()
             self.dht_device.exit()
