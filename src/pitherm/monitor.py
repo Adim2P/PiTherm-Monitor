@@ -3,7 +3,8 @@ from src.pitherm.config import (
     TEMP_THRESHOLD_HIGH,
     TEMP_THRESHOLD_LOW,
     LOG_INTERVAL_SECONDS,
-    READ_INTERVAL_SECONDS
+    READ_INTERVAL_SECONDS,
+    TEMP_HYSTERESIS
 )
 from src.pitherm.alert import (
     send_email_alert
@@ -19,10 +20,13 @@ class Monitor:
         self._last_log_time = 0
     
     def process_reading(self, temperature, humidity):
+        
+        high_reset = TEMP_THRESHOLD_HIGH - TEMP_HYSTERESIS
+        low_reset = TEMP_THRESHOLD_LOW + TEMP_HYSTERESIS
+        
         print(f"[DATA] Temp: {temperature:.1f}°C | Humidity: {humidity:.1f}%")
 
         self.hardware.update_lcd(temperature, humidity)
-
         current_time = time.time()
         
         if current_time - self._last_log_time >= LOG_INTERVAL_SECONDS:
@@ -32,28 +36,27 @@ class Monitor:
         send_to_thingspeak(temperature, humidity)
 
         if temperature >= TEMP_THRESHOLD_HIGH:
-            print("[DEBUG] High temp alert triggered!")
-            self.hardware.set_led(True)
-
             if not self.alert_sent_high:
+                print("[ALERT] High Temperature threshold reacehed.")
                 send_email_alert(temperature, humidity, alert_type="high")
-
                 self.alert_sent_high = True
-                self.alert_sent_low = False
-        elif temperature <= TEMP_THRESHOLD_LOW:
-            print("[DEBUG] Low temp alert triggered!")
-            self.hardware.set_lcd(True)
 
-            if not self.alert_sent_low:
-                send_email_alert(temperature, humidity, alert_type="low")
-
-                self.alert_send_low = True
-                self.alert_send_high = False
-        else:
-            self.hardware.set_led(False)
+        elif self.alert_sent_high and temperature <= high_reset:
+            print("[INFO] High temperature recovered.")
             self.alert_sent_high = False
-            self.alert_send_low = False
-    
+
+        if temperature <= TEMP_THRESHOLD_LOW:
+            if not self.alert_sent_low:
+                print("[ALERT] Low temperature threshold reached.")
+                send_email_alert(temperature, humidity, alert_type="low")
+                self.alert_sent_low = True
+        
+        elif self.alert_sent_low and temperature >= low_reset:
+            print("[INFO] Low temperature recovered.")
+            self.alert_sent_low = False
+
+        self.hardware.set_led(self.alert_sent_high or self.alert_sent_low)
+
     def run(self):
         print ("[START] Monitoring Started. Press Ctrl + C to stop.")
 
