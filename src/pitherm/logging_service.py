@@ -9,7 +9,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
-
 from src.pitherm.config import (
     SMTP_USER,
     SMTP_PASS,
@@ -19,15 +18,44 @@ from src.pitherm.config import (
 
 _last_report_month = None
 _excel_lock = threading.Lock()
+BASE_LOG_DIR = "logs"
+CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
+ARCHIVE_DIR = os.path.join(BASE_LOG_DIR, "archive")
+
+def ensure_log_directories():
+    os.makedirs(CURRENT_DIR, exist_ok=True)
+    os.makedirs(ARCHIVE_DIR, exist_ok=True)
+
+def archive_old_logs():
+    ensure_log_directories()
+
+    current_month = datetime.now().strftime("%Y-%m")
+
+    for file in os.listdir(CURRENT_DIR):
+        if file.startswith("temp_log_") and file.endswith(".xlsx"):
+            file_month = file.replace("temp_log_", "").replace(".xlsx", "")
+
+            if file_month != current_month:
+                src_path = os.path.join(CURRENT_DIR, file)
+                dst_path = os.path.join(ARCHIVE_DIR, file)
+
+                if not os.path.exists(dst_path):
+                    os.rename(src_path, dst_path)
+                    print(f"[ARCHIVE] Moved {file} to archive.")
 
 def build_recipients(primary):
     cc_list = [e.strip() for e in SMTP_CC.split(",")] if SMTP_CC else []
     return primary, cc_list, [primary] + cc_list
 
 def log_to_excel(temp, hum):
+    ensure_log_directories()
+    
+
     with _excel_lock:
+        archive_old_logs()
+
         date_str = datetime.now().strftime("%Y-%m")
-        filename = f"temp_log_{date_str}.xlsx"
+        filename = os.path.join(CURRENT_DIR, f"temp_log_{date_str}.xlsx")
 
     try:
         wb = load_workbook(filename)
