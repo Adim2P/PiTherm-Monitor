@@ -3,21 +3,7 @@
 PiTherm Monitor – Internal TODO Roadmap
 ===========================================================
 
-[ ] Rebuild SMS integration (new provider API)
-    - Replace legacy SMS logic
-    - Add heartbeat SMS support
-
-[ ] Sensor failure detection
-    - Track consecutive failed reads
-    - Alert if threshold exceeded
-
-[ ] Watchdog timer
-    - Detect stalled loop
-    - Trigger recovery or alert
-
-[ ] Heartbeat monitoring
-    - Daily health report
-    - Include uptime and last reading
+-- PRIORITY: Safe To Implement Now (No Refactor Debt) --
 
 [ ] Implement unified setup installer (setup.py)
     - Auto-detect OS (Windows vs Linux)
@@ -26,6 +12,7 @@ PiTherm Monitor – Internal TODO Roadmap
         * requirements-dev.txt (Windows)
         * requirements-pi.txt (Linux)
     - Upgrade pip inside venv before installing packages
+    - Validate required environment variables before install completes
 
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
@@ -34,6 +21,7 @@ PiTherm Monitor – Internal TODO Roadmap
     - Enable service on boot
     - Start service immediately after install
     - Configure Restart=always and RestartSec=5
+    - Validate service status after registration
 
 [ ] Implement clean uninstall capability
     - Stop running service
@@ -49,29 +37,73 @@ PiTherm Monitor – Internal TODO Roadmap
     - Validate argument input
     - Provide clear console output for each stage
 
-[ ] (Optional – Future Hardening)
-    - Add --status flag (check service status)
-    - Add version stamping in systemd description
-    - Add logging of installer actions
-    - Validate user permissions before install
-
-[ ] Integrate fallback failure alerting (Post API Migration)
-    - Trigger alert when Excel logging fails
-    - Hook alert into new SMS / notification API (not SMTP)
-    - Ensure alert sends only once per failure event
-    - Prevent alert spam during repeated failures
-    - Reset failure state when Excel logging recovers
-
 [ ] Implement logging failure state tracking
     - Add boolean flag: excel_faulted
     - Set to True when fallback is triggered
     - Reset to False after successful Excel write
-    - Expose state for heartbeat reporting
+    - Track last successful Excel write timestamp
+    - Expose state internally for monitoring
 
-[ ] Include logging health in future heartbeat report
-    - Report NORMAL or FALLBACK_ACTIVE
+[ ] Heartbeat monitoring (Structure Only – No API Integration Yet)
+    - Track system uptime
+    - Track last sensor reading timestamp
+    - Track hardware_ready state
+    - Track excel_faulted state
+    - Prepare structured health report payload (no sending yet)
+
+[ ] Watchdog timer
+    - Detect stalled main monitoring loop
+    - Track last successful loop execution timestamp
+    - Log watchdog trigger event
+    - Prepare hook for future notification integration
+    
+[ ] Improve DHT hardware self-test robustness
+    - Retry initial sensor read 2–3 times before failing
+    - Add small delay between retries
+    - Log retry attempts during initialization
+    - Only enter dev mode if all retries fail
+
+[ ] Improve LCD initialization validation
+    - Detect I2C initialization failure explicitly
+    - Attempt simple test write during startup
+    - Log clear diagnostic message if LCD fails
+    - Consider fallback mode if only LCD fails but DHT works
+
+------------------------------------------------------------
+
+-- POST SMS & EMAIL API MIGRATION (Avoid Refactor Debt Now) --
+
+[ ] Rebuild SMS integration (new provider API)
+    - Replace legacy SMTP-based alert flow
+    - Implement new notification client module
+    - Add retry logic with backoff
+    - Validate API credentials at startup
+
+[ ] Refactor temperature alerts to new notification API
+    - High temperature alert
+    - Low temperature alert
+    - Prevent duplicate alert spam
+    - Reset alert state on recovery
+
+[ ] Implement sensor failure detection
+    - Track consecutive failed reads
+    - Define MAX_SENSOR_FAILURE threshold
+    - Trigger hardware failure alert via new API
+    - Send alert only once per failure event
+    - Reset failure counter after successful sensor read
+
+[ ] Integrate fallback failure alerting
+    - Trigger alert when Excel logging fails
+    - Hook alert into new notification API
+    - Ensure alert sends only once per failure event
+    - Prevent alert spam during repeated failures
+    - Reset failure state when Excel logging recovers
+
+[ ] Enable full heartbeat notification delivery
+    - Send daily health report via new API
+    - Include uptime, hardware_ready, excel_faulted
     - Include last successful Excel write timestamp
-    - Ensure visibility in daily system health report
+    - Include last sensor reading timestamp
 """
 
 from src.pitherm.hardware import HardwareController
