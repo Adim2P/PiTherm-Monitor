@@ -38,8 +38,8 @@ class HardwareController:
     
     def set_led(self, state: bool):
         if HARDWARE_AVAILABLE:
-            GPIO.ouput(self.led_pin, GPIO.HIGH if state else GPIO.LOW)
-    
+            GPIO.output(self.led_pin, GPIO.HIGH if state else GPIO.LOW)
+
     def update_lcd(self, temp, hum):
         if HARDWARE_AVAILABLE:
             self.lcd.clear()

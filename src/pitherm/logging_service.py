@@ -111,7 +111,7 @@ def log_to_excel(temp, hum):
 def send_montly_report():
     with _excel_lock:
         month_str = datetime.now().strftime("%Y-%m")
-        filename = f"temp_log_{month_str}.xlsx"
+        filename = os.path.join(CURRENT_DIR, f"temp_log_{month_str}.xlsx")
 
     if not os.path.exists(filename):
         print("[WARN] No Excel File to send.")
@@ -143,7 +143,7 @@ def send_montly_report():
         server = smtplib.SMTP('smtp2.agmstech.com', 587)
         server.starttls()
         server.login(sender, SMTP_PASS)
-        server.sendmail(sender, recipients, msg.as_strings())
+        server.sendmail(sender, recipients, msg.as_string())
         server.quit()
         print("[OK] Monthly Excel report send via email.")
     except Exception as err:
