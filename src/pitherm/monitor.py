@@ -37,7 +37,7 @@ class Monitor:
 
         if temperature >= TEMP_THRESHOLD_HIGH:
             if not self.alert_sent_high:
-                print("[ALERT] High Temperature threshold reacehed.")
+                print("[ALERT] High Temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="high")
                 self.alert_sent_high = True
 
@@ -58,7 +58,7 @@ class Monitor:
         self.hardware.set_led(self.alert_sent_high or self.alert_sent_low)
 
     def run(self):
-        print ("[START] Monitoring Started. Press Ctrl + C to stop.")
+        print("[START] Monitoring Started. Press Ctrl + C to stop.")
 
         try:
             while True:

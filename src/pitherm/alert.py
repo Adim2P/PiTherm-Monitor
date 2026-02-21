@@ -20,7 +20,7 @@ def send_email_alert(temp, hum, alert_type="high"):
     sender = SMTP_USER
 
     primary_to, cc_list, recipients = build_recipients(SMTP_RECIPIENT)
-    subject = "ALERT: High Temperature" if alert_type == "high" else "ALERT: Low Temperature"
+    subject = "ALERT: High temperature" if alert_type == "high" else "ALERT: Low temperature"
     
     body = f"""
     Server Room Temperature Alert:

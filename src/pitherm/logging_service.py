@@ -23,7 +23,7 @@ BASE_LOG_DIR = "logs"
 CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
 ARCHIVE_DIR = os.path.join(BASE_LOG_DIR, "archive")
 
-def log_to_csv_fallback(temp, hun):
+def log_to_csv_fallback(temp, hum):
     ensure_log_directories()
 
     fallback_file = os.path.join(CURRENT_DIR, "fallback_log.csv")
@@ -45,7 +45,7 @@ def log_to_csv_fallback(temp, hun):
                 now.strftime("%Y-%m-%d"),
                 now.strftime("%H:%M:%S"),
                 temp,
-                hun
+                hum
             ])
     print("[FALLBACK] Logged reading to CSV.")
 
@@ -105,10 +105,10 @@ def log_to_excel(temp, hum):
         ])
         wb.save(filename)
     except Exception as e:
-        print("[CRITICAL] Excel logging failed. Switching to CSV Fallback.:", e)
+        print("[CRITICAL] Excel logging failed. Switching to CSV Fallback:", e)
         log_to_csv_fallback(temp, hum)
 
-def send_montly_report():
+def send_monthly_report():
     with _excel_lock:
         month_str = datetime.now().strftime("%Y-%m")
         filename = os.path.join(CURRENT_DIR, f"temp_log_{month_str}.xlsx")
@@ -145,7 +145,7 @@ def send_montly_report():
         server.login(sender, SMTP_PASS)
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
-        print("[OK] Monthly Excel report send via email.")
+        print("[OK] Monthly Excel report sent via email.")
     except Exception as err:
         print("[ERROR] Failed to send excel report:", err)
 
@@ -156,7 +156,7 @@ def check_and_send_monthly_report():
     current_month = now.strftime("%Y-%m")
 
     if now.day == 1 and now.hour >= 7 and _last_report_month != current_month:
-            send_montly_report()
+            send_monthly_report()
             _last_report_month = current_month
 
 def run_scheduler():
