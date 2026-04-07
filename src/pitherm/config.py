@@ -5,11 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-THINGSPEAK_API_KEY = os.getenv("THINGSPEAK_API_KEY")
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASS = os.getenv("SMTP_PASS")
+ADAFRUIT_IO_USERNAME = os.getenv("ADAFRUIT_IO_USERNAME")
+ADAFRUIT_IO_KEY = os.getenv("ADAFRUIT_IO_KEY")
 SMTP_RECIPIENT = os.getenv("SMTP_RECIPIENT")
 SMTP_CC = os.getenv("SMTP_CC")
+SMTP_FROM = os.getenv("SMTP_FROM")
+SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_PORT = os.getenv("SMTP_PORT")
 
 # Global Variables
 

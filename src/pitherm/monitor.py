@@ -6,11 +6,9 @@ from src.pitherm.config import (
     READ_INTERVAL_SECONDS,
     TEMP_HYSTERESIS
 )
-from src.pitherm.alert import (
-    send_email_alert
-)
+from src.pitherm.alert import send_email_alert
 from src.pitherm.logging_service import log_to_excel
-from src.pitherm.dashboard import send_to_thingspeak
+from src.pitherm.dashboard import send_to_adafruit
 
 class Monitor:
     def __init__(self, hardware):
@@ -33,7 +31,7 @@ class Monitor:
             log_to_excel(temperature, humidity)
             self._last_log_time = current_time
 
-        send_to_thingspeak(temperature, humidity)
+        send_to_adafruit(temperature, humidity)
 
         if temperature >= TEMP_THRESHOLD_HIGH:
             if not self.alert_sent_high:
