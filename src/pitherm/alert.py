@@ -1,14 +1,17 @@
-from src.pitherm.smtp_newClient import SMTPClient
+from src.pitherm.smtp_client import SMTPClient
 
 def send_email_alert(temp, hum, alert_type="high"):
     subject = "ALERT: High Temperature" if alert_type == "high" else "ALERT: Low temperature"
 
     body = f"""
-Server Room Temperature Alert:
+    <p><strong>Server Room Temperature Alert:</strong></p>
 
-Temperature: {temp:.1f}°C
-Humidity: {hum:.1f}%
+    <p>
+    Temperature: {temp:.1f}°C<br>
+    Humidity: {hum:.1f}%
+    </p>
 
-- Raspberry Pi Temperature Monitor
-"""
-    SMTPClient().send(subject, body)
+    <p>- Raspberry Pi Temperature Monitor</p>
+    """
+
+    SMTPClient().send(subject, body, is_html=True)
