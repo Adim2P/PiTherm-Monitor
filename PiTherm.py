@@ -37,6 +37,33 @@ PiTherm Monitor – Internal TODO Roadmap
     - Validate argument input
     - Provide clear console output for each stage
 
+[ ] Add auto fetch of git files on main branch after testing
+    - setup function that auto retrieves updated files in repo
+
+------------------------------------------------------------
+
+-- Additional Features -
+
+[ ] Implement sensor failure detection
+    - Track consecutive failed reads
+    - Define MAX_SENSOR_FAILURE threshold
+    - Trigger hardware failure alert via new API
+    - Send alert only once per failure event
+    - Reset failure counter after successful sensor read
+
+[ ] Integrate fallback failure alerting
+    - Trigger alert when Excel logging fails
+    - Hook alert into new notification API
+    - Ensure alert sends only once per failure event
+    - Prevent alert spam during repeated failures
+    - Reset failure state when Excel logging recovers
+
+[ ] Enable full heartbeat notification delivery
+    - Send daily health report via new API
+    - Include uptime, hardware_ready, excel_faulted
+    - Include last successful Excel write timestamp
+    - Include last sensor reading timestamp
+
 [ ] Implement logging failure state tracking
     - Add boolean flag: excel_faulted
     - Set to True when fallback is triggered
@@ -68,42 +95,6 @@ PiTherm Monitor – Internal TODO Roadmap
     - Attempt simple test write during startup
     - Log clear diagnostic message if LCD fails
     - Consider fallback mode if only LCD fails but DHT works
-
-------------------------------------------------------------
-
--- POST SMS & EMAIL API MIGRATION (Avoid Refactor Debt Now) --
-
-[ ] Rebuild SMS integration (new provider API)
-    - Replace legacy SMTP-based alert flow
-    - Implement new notification client module
-    - Add retry logic with backoff
-    - Validate API credentials at startup
-
-[ ] Refactor temperature alerts to new notification API
-    - High temperature alert
-    - Low temperature alert
-    - Prevent duplicate alert spam
-    - Reset alert state on recovery
-
-[ ] Implement sensor failure detection
-    - Track consecutive failed reads
-    - Define MAX_SENSOR_FAILURE threshold
-    - Trigger hardware failure alert via new API
-    - Send alert only once per failure event
-    - Reset failure counter after successful sensor read
-
-[ ] Integrate fallback failure alerting
-    - Trigger alert when Excel logging fails
-    - Hook alert into new notification API
-    - Ensure alert sends only once per failure event
-    - Prevent alert spam during repeated failures
-    - Reset failure state when Excel logging recovers
-
-[ ] Enable full heartbeat notification delivery
-    - Send daily health report via new API
-    - Include uptime, hardware_ready, excel_faulted
-    - Include last successful Excel write timestamp
-    - Include last sensor reading timestamp
 """
 
 from src.pitherm.hardware import HardwareController
