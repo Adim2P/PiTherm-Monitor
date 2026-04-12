@@ -11,7 +11,7 @@ SMTP_RECIPIENT = os.getenv("SMTP_RECIPIENT")
 SMTP_CC = os.getenv("SMTP_CC")
 SMTP_FROM = os.getenv("SMTP_FROM")
 SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = os.getenv("SMTP_PORT")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 
 # Global Variables
 
