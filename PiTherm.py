@@ -96,12 +96,38 @@ PiTherm Monitor – Internal TODO Roadmap
     - Log clear diagnostic message if LCD fails
     - Consider fallback mode if only LCD fails but DHT works
 """
+import sys
+import os
+
+def is_venv():
+    return sys.prefix != sys.base_prefix
+
+if not is_venv():
+    print("[ERROR] Not running inside a virtual environment.")
+    print("[HINT] Activate your venv first:")
+
+    if os.name == "nt":
+        print(" venv\\Scripts\\activate")
+    else:
+        print(" source venv/bin/activate")
+
+    print("\nThen Run: python PiTherm.py")
+    exit(1)
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    print("[ERROR] Required dependencies not installed.")
+    print("Run: python setup.py install")
+    exit(1)
 
 from src.pitherm.hardware import HardwareController
 from src.pitherm.monitor import Monitor
 from src.pitherm.logging_service import start_scheduler
 
 def main():
+    print(f"[START] Using python: {sys.executable}")
+
     hardware = HardwareController()
     monitor = Monitor(hardware)
 
