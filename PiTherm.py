@@ -6,12 +6,6 @@ PiTherm Monitor – Internal TODO Roadmap
 -- PRIORITY: Safe To Implement Now (No Refactor Debt) --
 
 [ ] Implement unified setup installer (setup.py)
-    - Auto-detect OS (Windows vs Linux)
-    - Create virtual environment (venv)
-    - Install correct requirements file:
-        * requirements-dev.txt (Windows)
-        * requirements-pi.txt (Linux)
-    - Upgrade pip inside venv before installing packages
     - Validate required environment variables before install completes
 
 [ ] Implement automatic systemd service registration (Linux only)
