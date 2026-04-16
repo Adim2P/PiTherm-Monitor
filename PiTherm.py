@@ -1,9 +1,5 @@
 """
-===========================================================
-PiTherm Monitor – Internal TODO Roadmap
-===========================================================
-
--- PRIORITY: Safe To Implement Now (No Refactor Debt) --
+TODO: Priority to Implement
 
 [ ] Implement unified setup installer (setup.py)
     - Validate required environment variables before install completes
@@ -36,7 +32,7 @@ PiTherm Monitor – Internal TODO Roadmap
 
 ------------------------------------------------------------
 
--- Additional Features -
+TODO: When main installer Implementation is done
 
 [ ] Implement sensor failure detection
     - Track consecutive failed reads
