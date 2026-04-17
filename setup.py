@@ -17,7 +17,7 @@ def run(cmd):
 def get_pip():
     if OS == "Windows":
         return os.path.join(VENV_DIR, "Scripts", "pip")
-    return os.path.join
+    return os.path.join(VENV_DIR, "bin", "pip")
 
 def get_python():
     if OS == "Windows":
