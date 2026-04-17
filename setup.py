@@ -7,6 +7,8 @@ import shutil
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 VENV_DIR = os.path.join(PROJECT_ROOT, "venv")
 OS = platform.system()
+ENV_FILE = os.path.join(PROJECT_ROOT, ".env")
+ENV_EXAMPLE = os.path.join(PROJECT_ROOT, ".env.example")
 
 def run(cmd):
     print(f"[RUN] {cmd}")
@@ -33,15 +35,34 @@ def install_requirements():
     req_file = "requirements-dev.txt" if OS == "Windows" else "requirements-pi.txt"
     pip = get_pip()
     python_exec = get_python()
-    print("[DEBUG] Using Python:", python_exec) # DEBUG
-    print("[DEBUG] Using pip:", pip) # DEBUG
     print(f"[INFO] Installing dependencies from {req_file}")
     run(f'"{python_exec}" -m pip install --upgrade pip')
     run(f'"{pip}" install -r "{req_file}"')
 
+def setup_env_file():
+    if os.path.exists(ENV_FILE):
+        print("[INFO] .env already exists. Skipping.")
+        return
+    
+    if not os.path.exists(ENV_EXAMPLE):
+        print("[WARN] .env.example is not found. Skipping env setup.")
+        return
+    
+    print("[INFO] Creating .env from template...")
+
+    with open(ENV_EXAMPLE, "r") as src:
+        content = src.read()
+    
+    with open(ENV_FILE, "w") as dst:
+        dst.write(content)
+
+    print("[OK] .env file created.")
+    print("[HINT] Please edit .env and fill in required values.")
+
 def install():
     create_venv()
     install_requirements()
+    setup_env_file()
     print("[SUCESS] Basic install complete.")
 
 
