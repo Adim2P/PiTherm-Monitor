@@ -1,9 +1,6 @@
 """
 TODO: Priority to Implement
 
-[ ] Implement unified setup installer (setup.py)
-    - Validate required environment variables before install completes
-
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
     - Set WorkingDirectory to project root
@@ -20,12 +17,6 @@ TODO: Priority to Implement
     - Reload systemd daemon
     - Remove virtual environment (venv)
     - Ensure no leftover files or processes remain
-
-[ ] Add install / uninstall CLI argument handling
-    - python setup.py install
-    - python setup.py uninstall
-    - Validate argument input
-    - Provide clear console output for each stage
 
 [ ] Add auto fetch of git files on main branch after testing
     - setup function that auto retrieves updated files in repo
@@ -94,12 +85,16 @@ def is_venv():
 
 if not is_venv():
     print("[ERROR] Not running inside a virtual environment.")
-    print("[HINT] Activate your venv first:")
-
-    if os.name == "nt":
-        print(" venv\\Scripts\\activate")
+    
+    if not os.path.exists("venv"):
+        print("[HINT] Project is not set up yet.")
+        print("Run: python setup.py install")
     else:
-        print(" source venv/bin/activate")
+        print("[HINT] Activate your venv first:")
+        if os.name == "nt":
+            print(" venv\\Scripts\\activate")
+        else:
+            print(" source venv/bin/activate")
 
     print("\nThen Run: python PiTherm.py")
     exit(1)
@@ -114,6 +109,9 @@ except ImportError:
 from src.pitherm.hardware import HardwareController
 from src.pitherm.monitor import Monitor
 from src.pitherm.logging_service import start_scheduler
+from src.pitherm.config import validate_env
+
+validate_env()
 
 def main():
     print(f"[START] Using python: {sys.executable}")
