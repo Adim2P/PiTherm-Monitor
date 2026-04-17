@@ -13,6 +13,9 @@ SMTP_CC = os.getenv("SMTP_CC")
 SMTP_FROM = os.getenv("SMTP_FROM")
 SMTP_HOST = os.getenv("SMTP_HOST")
 SMTP_PORT = os.getenv("SMTP_PORT")
+SMTP_USERNAME = os.getenv("SMTP_USERNAME")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+
 
 # Global Variables
 
@@ -30,7 +33,9 @@ REQUIRED_ENV_VARS = [
     "SMTP_FROM",
     "SMTP_RECIPIENT",
     "ADAFRUIT_IO_USERNAME",
-    "ADAFRUIT_IO_KEY"
+    "ADAFRUIT_IO_KEY",
+    "SMTP_USERNAME",
+    "SMTP_PASSWORD"
 ]
 
 def validate_env():
