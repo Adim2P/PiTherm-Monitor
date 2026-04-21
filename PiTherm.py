@@ -76,6 +76,12 @@ TODO: When main installer Implementation is done
     - Attempt simple test write during startup
     - Log clear diagnostic message if LCD fails
     - Consider fallback mode if only LCD fails but DHT works
+
+TODO: Some changes as per request
+
+* Add feature that sends email when high temp reach occurence
+* Change Monthly Sending of Excel to Weekly Instead
+
 """
 import sys
 import os
