@@ -4,4 +4,3 @@ pycache/
 .env
 .vscode/
 logs/
-.env.backup
