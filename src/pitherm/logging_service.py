@@ -9,7 +9,7 @@ from src.pitherm.smtp_client import SMTPClient
 from email.mime.application import MIMEApplication
 import csv
 
-_last_report_month = None
+_last_report_week = None
 _excel_lock = threading.Lock()
 BASE_LOG_DIR = "logs"
 CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
@@ -33,12 +33,12 @@ def log_to_csv_fallback(temp, hum):
                 "Humidity (%)"
             ])
 
-            writer.writerow([
-                now.strftime("%Y-%m-%d"),
-                now.strftime("%H:%M:%S"),
-                temp,
-                hum
-            ])
+        writer.writerow([
+            now.strftime("%Y-%m-%d"),
+            now.strftime("%H:%M:%S"),
+            temp,
+            hum
+        ])
     print("[FALLBACK] Logged reading to CSV.")
 
 def ensure_log_directories():
@@ -48,13 +48,14 @@ def ensure_log_directories():
 def archive_old_logs():
     ensure_log_directories()
 
-    current_month = datetime.now().strftime("%Y-%m")
+    current_year, current_week, _ = datetime.now().isocalendar()
+    current_week_str = f"{current_year}_W{current_week:02d}"
 
     for file in os.listdir(CURRENT_DIR):
         if file.startswith("temp_log_") and file.endswith(".xlsx"):
-            file_month = file.replace("temp_log_", "").replace(".xlsx", "")
+            file_week = file.replace("temp_log_", "").replace(".xlsx", "")
 
-            if file_month != current_month:
+            if file_week != current_week_str:
                 src_path = os.path.join(CURRENT_DIR, file)
                 dst_path = os.path.join(ARCHIVE_DIR, file)
 
@@ -69,8 +70,8 @@ def log_to_excel(temp, hum):
     with _excel_lock:
         archive_old_logs()
 
-        date_str = datetime.now().strftime("%Y-%m")
-        filename = os.path.join(CURRENT_DIR, f"temp_log_{date_str}.xlsx")
+        year, week, _ = datetime.now().isocalendar()
+        filename = os.path.join(CURRENT_DIR, f"temp_log_{year}_W{week:02d}.xlsx")
     
         try:
             try:
@@ -79,7 +80,7 @@ def log_to_excel(temp, hum):
             except FileNotFoundError:
                 wb = Workbook()
                 ws = wb.active
-                ws.title = "Monthly Readings"
+                ws.title = "Weekly Readings"
                 ws.append(["Date", "Time", "Temperature (°C)", "Humidity (%)"])
                 for col in range(1, 5):
                     ws[f"{get_column_letter(col)}1"].font = Font(bold=True)
@@ -97,16 +98,18 @@ def log_to_excel(temp, hum):
 
 def send_monthly_report():
     with _excel_lock:
-        month_str = datetime.now().strftime("%Y-%m")
-        filename = os.path.join(CURRENT_DIR, f"temp_log_{month_str}.xlsx")
+
+        year, week, _ = datetime.now().isocalendar()
+        week_str = f"{year}_W{week:02d}"
+        filename = os.path.join(CURRENT_DIR, f"temp_log_{week_str}.xlsx")
 
     if not os.path.exists(filename):
         print("[WARN] No Excel File to send.")
         return
 
-    subject = f"Monthly Temp Report - {month_str}"
+    subject = f"Weekly Temp Report - {week_str}"
     body = f"""
-    <p>Attached is the temperature and humidity log for {month_str}.</p>
+    <p>Attached is the temperature and humidity log for {week_str}.</p>
     <p>- Raspberry Pi Monitor</p>
     """
 
@@ -128,17 +131,15 @@ def send_monthly_report():
         attachment=attachment
     )
 
-    return body #temporary
-
 def check_and_send_monthly_report():
-    global _last_report_month
+    global _last_report_week
 
     now = datetime.now()
-    current_month = now.strftime("%Y-%m")
+    current_week = now.isocalendar()[:2]
 
-    if now.day == 1 and now.hour >= 7 and _last_report_month != current_month:
+    if now.day == 1 and now.hour >= 7 and _last_report_week != current_week:
             send_monthly_report()
-            _last_report_month = current_month
+            _last_report_week = current_week
 
 def run_scheduler():
     while True:
