@@ -33,12 +33,12 @@ def log_to_csv_fallback(temp, hum):
                 "Humidity (%)"
             ])
 
-            writer.writerow([
-                now.strftime("%Y-%m-%d"),
-                now.strftime("%H:%M:%S"),
-                temp,
-                hum
-            ])
+        writer.writerow([
+            now.strftime("%Y-%m-%d"),
+            now.strftime("%H:%M:%S"),
+            temp,
+            hum
+        ])
     print("[FALLBACK] Logged reading to CSV.")
 
 def ensure_log_directories():
