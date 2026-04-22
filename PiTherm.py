@@ -78,10 +78,10 @@ TODO: Some changes as per request, and bug fixes
 ! IMPORTANT: To be fixed right away
 
 - Add one more decimal point
-- Add feature that sends email when high temp reach occurence
 - Add an email sending feature when temps reach normal level 
   after high temperature or low temperature
-- Fix Red Light not consistent when temps are still in high threshold
+! - Fix Red Light not consistent when temps are still in high threshold
+- Logging Catch for any Hardware Hiccups
 
 ? Edge Cases:
 
