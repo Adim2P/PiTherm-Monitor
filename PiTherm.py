@@ -77,10 +77,10 @@ TODO: When main installer Implementation is done
 TODO: Some changes as per request, and bug fixes
 ! IMPORTANT: To be fixed right away
 
-- Add one more decimal point
+- Daily sending of Email, if Temps are still well above High Threshold
 - Add an email sending feature when temps reach normal level 
   after high temperature or low temperature
-! - Fix Red Light not consistent when temps are still in high threshold
+-  Add one more decimal point
 - Logging Catch for any Hardware Hiccups
 
 ? Edge Cases:
