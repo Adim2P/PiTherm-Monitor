@@ -8,6 +8,7 @@ from openpyxl.styles import Font
 from src.pitherm.smtp_client import SMTPClient
 from email.mime.application import MIMEApplication
 import csv
+import shutil
 
 _last_report_week = None
 _excel_lock = threading.Lock()
@@ -64,9 +65,8 @@ def archive_old_logs():
                 src_path = os.path.join(CURRENT_DIR, file)
                 dst_path = os.path.join(ARCHIVE_DIR, file)
 
-                if not os.path.exists(dst_path):
-                    os.rename(src_path, dst_path)
-                    print(f"[ARCHIVE] Moved {file} to archive.")
+                shutil.move(src_path, dst_path)
+                print(f"[ARCHIVE] Moved {file} to archive.")
 
 def log_to_excel(temp, hum):
     ensure_log_directories()
@@ -152,7 +152,7 @@ def check_and_send_monthly_report(now=None):
 
     if now is None:
         now = datetime.now()
-        
+
     current_week = now.isocalendar()[:2]
 
     if now.weekday() == 0 and now.hour >= 7 and _last_report_week != current_week:
