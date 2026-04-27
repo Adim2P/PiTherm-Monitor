@@ -113,6 +113,12 @@ def send_monthly_report():
         week_str = f"{year}_W{week:02d}"
         filename = os.path.join(CURRENT_DIR, f"temp_log_{week_str}.xlsx")
 
+    #*Test Snippet for Sending of Weekly Email
+    if _TEST_MODE:
+        print(f"[TEST] Would send weekly report: {filename}")
+        print(f"[TEST] Subject: Weekly Temp Report - {week_str}")
+        return
+
     if not os.path.exists(filename):
         print("[WARN] No Excel File to send.")
         return
@@ -141,13 +147,15 @@ def send_monthly_report():
         attachment=attachment
     )
 
-def check_and_send_monthly_report():
+def check_and_send_monthly_report(now=None):
     global _last_report_week
 
-    now = datetime.now()
+    if now is None:
+        now = datetime.now()
+        
     current_week = now.isocalendar()[:2]
 
-    if now.day == 1 and now.hour >= 7 and _last_report_week != current_week:
+    if now.weekday() == 0 and now.hour >= 7 and _last_report_week != current_week:
             send_monthly_report()
             _last_report_week = current_week
 
