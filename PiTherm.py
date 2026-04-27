@@ -18,9 +18,6 @@ TODO: Priority to Implement
     - Remove virtual environment (venv)
     - Ensure no leftover files or processes remain
 
-[ ] Add auto fetch of git files on main branch after testing
-    - setup function that auto retrieves updated files in repo
-
 ------------------------------------------------------------
 
 TODO: When main installer Implementation is done
@@ -32,18 +29,17 @@ TODO: When main installer Implementation is done
     - Send alert only once per failure event
     - Reset failure counter after successful sensor read
 
-[ ] Integrate fallback failure alerting
-    - Trigger alert when Excel logging fails
-    - Hook alert into new notification API
-    - Ensure alert sends only once per failure event
-    - Prevent alert spam during repeated failures
-    - Reset failure state when Excel logging recovers
+[ ] Improve DHT hardware self-test robustness
+    - Retry initial sensor read 2–3 times before failing
+    - Add small delay between retries
+    - Log retry attempts during initialization
+    - Only enter dev mode if all retries fail
 
-[ ] Enable full heartbeat notification delivery
-    - Send daily health report via new API
-    - Include uptime, hardware_ready, excel_faulted
-    - Include last successful Excel write timestamp
-    - Include last sensor reading timestamp
+[ ] Improve LCD initialization validation
+    - Detect I2C initialization failure explicitly
+    - Attempt simple test write during startup
+    - Log clear diagnostic message if LCD fails
+    - Consider fallback mode if only LCD fails but DHT works
 
 [ ] Implement logging failure state tracking
     - Add boolean flag: excel_faulted
@@ -64,18 +60,35 @@ TODO: When main installer Implementation is done
     - Track last successful loop execution timestamp
     - Log watchdog trigger event
     - Prepare hook for future notification integration
-    
-[ ] Improve DHT hardware self-test robustness
-    - Retry initial sensor read 2–3 times before failing
-    - Add small delay between retries
-    - Log retry attempts during initialization
-    - Only enter dev mode if all retries fail
 
-[ ] Improve LCD initialization validation
-    - Detect I2C initialization failure explicitly
-    - Attempt simple test write during startup
-    - Log clear diagnostic message if LCD fails
-    - Consider fallback mode if only LCD fails but DHT works
+[ ] Integrate fallback failure alerting
+    - Trigger alert when Excel logging fails
+    - Hook alert into new notification API
+    - Ensure alert sends only once per failure event
+    - Prevent alert spam during repeated failures
+    - Reset failure state when Excel logging recovers
+
+[ ] Enable full heartbeat notification delivery
+    - Send daily health report via new API
+    - Include uptime, hardware_ready, excel_faulted
+    - Include last successful Excel write timestamp
+    - Include last sensor reading timestamp
+
+TODO: Some changes as per request, and bug fixes
+! IMPORTANT: To be fixed right away
+
+- Daily sending of Email, if Temps are still well above High Threshold
+- Add an email sending feature when temps reach normal level 
+  after high temperature or low temperature
+-  Add one more decimal point
+- Logging Catch for any Hardware Hiccups
+
+? Edge Cases:
+
+- Since Alarm states are permanent, what if it's not resolved
+  during non work hours? Should there still be sending of email
+  alert after some time?
+
 """
 import sys
 import os
