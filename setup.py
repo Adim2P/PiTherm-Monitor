@@ -11,8 +11,8 @@ ENV_FILE = os.path.join(PROJECT_ROOT, ".env")
 ENV_EXAMPLE = os.path.join(PROJECT_ROOT, ".env.example")
 
 def run(cmd):
-    print(f"[RUN] {cmd}")
-    subprocess.check_call(cmd, shell=True)
+    print(f"[RUN] {' '.join(cmd)}")
+    subprocess.check_call(cmd)
 
 def get_pip():
     if OS == "Windows":
@@ -27,7 +27,7 @@ def get_python():
 def create_venv():
     if not os.path.exists(VENV_DIR):
         print("[INFO] Creating virtual environment...")
-        run(f'"{sys.executable}" -m venv "{VENV_DIR}"')
+        run([sys.executable, "-m", "venv", VENV_DIR])
     else:
         print("[INFO] venv already exists.")
 
@@ -36,8 +36,8 @@ def install_requirements():
     pip = get_pip()
     python_exec = get_python()
     print(f"[INFO] Installing dependencies from {req_file}")
-    run(f'"{python_exec}" -m pip install --upgrade pip')
-    run(f'"{pip}" install -r "{req_file}"')
+    run([python_exec, "-m", "pip", "install", "--upgrade", "pip"])
+    run([pip, "install", "-r", req_file])
 
 def setup_env_file():
     if os.path.exists(ENV_FILE):
@@ -67,8 +67,11 @@ def install():
 
 
 def uninstall():
-    if os.path.exists(VENV_DIR):
-        print("[INFO] Removing virtual environment...")
+    if not os.path.exists(VENV_DIR):
+        print("[INFO] No virtual environment found. Nothing to remove.")
+        return
+
+    print("[INFO] Removing virtual environment...")
     
     try:
         shutil.rmtree(VENV_DIR)

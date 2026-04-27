@@ -1,4 +1,5 @@
 import platform
+from src.pitherm.config import ALLOW_FAKE_HARDWARE
 
 HARDWARE_AVAILABLE = False
 
@@ -21,7 +22,7 @@ class HardwareController:
         self.hardware_ready = False
 
         if not HARDWARE_AVAILABLE:
-            print("[INFO] Running in development mode (hardware libraries not available)")
+            print("[WARN] Hardware libraries not available.")
             return
 
         try:
@@ -46,30 +47,41 @@ class HardwareController:
             print("[OK] Hardware initialized successfully.")
 
         except Exception as e:
-            print("[WARN] Hardware initialization failed. Switching to development mode:", e)
+            print("[WARN] Hardware initialization failed:", e)
             self.dht_device = None
             self.lcd = None
             self.hardware_ready = False
 
     def read_sensor(self):
-        if self.hardware_ready:
-            return self.dht_device.temperature, self.dht_device.humidity
-        else:
+        dht_device = self.dht_device
+
+        if self.hardware_ready and dht_device is not None:
+            return dht_device.temperature, dht_device.humidity
+
+        if ALLOW_FAKE_HARDWARE:
+            print("[WARN] Using fake hardware reading.")
             return 24.0, 50.0
+
+        raise RuntimeError("Hardware is not ready and fake hardware is disabled.")
 
     def set_led(self, state: bool):
         if self.hardware_ready:
             GPIO.output(self.led_pin, GPIO.HIGH if state else GPIO.LOW)
 
     def update_lcd(self, temp, hum):
-        if self.hardware_ready:
-            self.lcd.clear()
-            self.lcd.write_string(f"Temp: {temp:.1f}C")
-            self.lcd.crlf()
-            self.lcd.write_string(f"Hum : {hum:.1f}%")
+        lcd = self.lcd
+
+        if self.hardware_ready and lcd is not None:
+            lcd.clear()
+            lcd.write_string(f"Temp: {temp:.1f}C")
+            lcd.crlf()
+            lcd.write_string(f"Hum : {hum:.1f}%")
 
     def cleanup(self):
-        if self.hardware_ready:
-            self.lcd.clear()
+        lcd = self.lcd
+        dht_device = self.dht_device
+
+        if self.hardware_ready and lcd is not None and dht_device is not None:
+            lcd.clear()
             GPIO.cleanup()
-            self.dht_device.exit()
+            dht_device.exit()
