@@ -14,11 +14,16 @@ _excel_lock = threading.Lock()
 BASE_LOG_DIR = "logs"
 CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
 ARCHIVE_DIR = os.path.join(BASE_LOG_DIR, "archive")
+_TEST_MODE = False
+_FORCE_CSV_FALLBACK = False
 
 def log_to_csv_fallback(temp, hum):
     ensure_log_directories()
 
-    fallback_file = os.path.join(CURRENT_DIR, "fallback_log.csv")
+    year, week, _ = datetime.now().isocalendar()
+    week_str = f"{year}_W{week:02d}"
+
+    fallback_file = os.path.join(CURRENT_DIR, f"fallback_{week_str}.csv")
     now = datetime.now()
     file_exists = os.path.exists(fallback_file)
 
@@ -65,14 +70,19 @@ def archive_old_logs():
 
 def log_to_excel(temp, hum):
     ensure_log_directories()
-    
 
     with _excel_lock:
         archive_old_logs()
 
         year, week, _ = datetime.now().isocalendar()
         filename = os.path.join(CURRENT_DIR, f"temp_log_{year}_W{week:02d}.xlsx")
-    
+
+        #*CSV Fallback Test Snippet
+        if _TEST_MODE and _FORCE_CSV_FALLBACK:
+            print("[TEST] Forcing CSV Fallback...")
+            log_to_csv_fallback(temp, hum)
+            return
+        
         try:
             try:
                 wb = load_workbook(filename)
