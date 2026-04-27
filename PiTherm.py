@@ -93,13 +93,16 @@ TODO: Some changes as per request, and bug fixes
 import sys
 import os
 
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+VENV_PATH = os.path.join(PROJECT_ROOT, "venv")
+
 def is_venv():
     return sys.prefix != sys.base_prefix
 
 if not is_venv():
     print("[ERROR] Not running inside a virtual environment.")
     
-    if not os.path.exists("venv"):
+    if not os.path.exists(VENV_PATH):
         print("[HINT] Project is not set up yet.")
         print("Run: python setup.py install")
     else:
