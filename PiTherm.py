@@ -80,14 +80,8 @@ TODO: Some changes as per request, and bug fixes
 - Daily sending of Email, if Temps are still well above High Threshold
 - Add an email sending feature when temps reach normal level 
   after high temperature or low temperature
--  Add one more decimal point
+- Add one more decimal point
 - Logging Catch for any Hardware Hiccups
-
-? Edge Cases:
-
-- Since Alarm states are permanent, what if it's not resolved
-  during non work hours? Should there still be sending of email
-  alert after some time?
 
 """
 import sys
