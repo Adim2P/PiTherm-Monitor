@@ -16,6 +16,8 @@ class Monitor:
         self.alert_sent_high = False
         self.alert_sent_low = False
         self._last_log_time = 0
+        self.last_daily_high_alert_date = None
+        self.last_datly_low_alert_date = None
     
     def process_reading(self, temperature, humidity):
         

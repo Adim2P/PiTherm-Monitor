@@ -1,10 +1,44 @@
 import os
 import sys
 from dotenv import load_dotenv
+import configparser
+from datetime import datetime
 
 # ENVs
 
 load_dotenv()
+
+CONFIG_FILE = "config.ini"
+
+_config = configparser.ConfigParser()
+
+def load_ini():
+    if not os.path.exists(CONFIG_FILE):
+        print("[INFO] config.ini not found. Creating default config.")
+
+        _config["thresholds"] = {
+            "temp_high": "25.0",
+            "temp_low": "19.0",
+            "hysteresis": "1.0"
+        }
+
+        _config["intervals"] = {
+            "read_seconds": "30",
+            "log_seconds": "300"
+        }
+
+        _config["alerts"] = {
+            "daily_alert_time": "09:00",
+            "email_enabled": "true"
+        }
+
+        with open(CONFIG_FILE, "w") as f:
+            _config.write(f)
+    
+    else:
+        _config.read(CONFIG_FILE)
+
+load_ini()
 
 ADAFRUIT_IO_USERNAME = os.getenv("ADAFRUIT_IO_USERNAME")
 ADAFRUIT_IO_KEY = os.getenv("ADAFRUIT_IO_KEY")
