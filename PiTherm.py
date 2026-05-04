@@ -77,10 +77,6 @@ TODO: When main installer Implementation is done
 TODO: Some changes as per request, and bug fixes
 ! IMPORTANT: To be fixed right away
 
-- Daily sending of Email, if Temps are still well above High Threshold
-- Add an email sending feature when temps reach normal level 
-  after high temperature or low temperature
-- Add one more decimal point
 - Logging Catch for any Hardware Hiccups
 
 """
