@@ -20,6 +20,7 @@ class Monitor:
         self._last_log_time = 0
         self.last_daily_high_alert_date = None
         self.last_daily_low_alert_date = None
+        self._running = True
     
     def process_reading(self, temperature, humidity):
         
@@ -78,7 +79,7 @@ class Monitor:
         print("[START] Monitoring Started. Press Ctrl + C to stop.")
 
         try:
-            while True:
+            while self._running:
                 try:
                     temperature, humidity = self.hardware.read_sensor()
 
@@ -106,3 +107,7 @@ class Monitor:
         target_time = datetime.strptime(DAILY_ALERT_TIME, "%H:%M").time()
 
         return now.time() >= target_time
+
+    def stop(self):
+        print("[STOP] Shutdown signal received.")
+        self._running = False
