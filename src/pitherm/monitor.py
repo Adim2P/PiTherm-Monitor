@@ -9,6 +9,8 @@ from src.pitherm.config import (
 from src.pitherm.alert import send_email_alert
 from src.pitherm.logging_service import log_to_excel
 from src.pitherm.dashboard import send_to_adafruit
+from datetime import datetime
+from src.pitherm.config import DAILY_ALERT_TIME
 
 class Monitor:
     def __init__(self, hardware):
@@ -16,13 +18,17 @@ class Monitor:
         self.alert_sent_high = False
         self.alert_sent_low = False
         self._last_log_time = 0
+        self.last_daily_high_alert_date = None
+        self.last_daily_low_alert_date = None
+        self._running = True
     
     def process_reading(self, temperature, humidity):
         
         high_reset = TEMP_THRESHOLD_HIGH - TEMP_HYSTERESIS
         low_reset = TEMP_THRESHOLD_LOW + TEMP_HYSTERESIS
+        today = datetime.now().date()
         
-        print(f"[DATA] Temp: {temperature:.1f}°C | Humidity: {humidity:.1f}%")
+        print(f"[DATA] Temp: {temperature:.2f}°C | Humidity: {humidity:.2f}%")
 
         self.hardware.update_lcd(temperature, humidity)
         current_time = time.time()
@@ -38,9 +44,16 @@ class Monitor:
                 print("[ALERT] High Temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="high")
                 self.alert_sent_high = True
+            
+            if self._is_time_for_daily_alert():
+                if self.last_daily_high_alert_date != today:
+                    print("[DAILY ALERT] High temperature still active.")
+                    send_email_alert(temperature, humidity, alert_type="daily_high")
+                    self.last_daily_high_alert_date = today
 
         elif self.alert_sent_high and temperature <= high_reset:
             print("[INFO] High temperature recovered.")
+            send_email_alert(temperature, humidity, alert_type="recovered_high")
             self.alert_sent_high = False
 
         if temperature <= TEMP_THRESHOLD_LOW:
@@ -48,9 +61,16 @@ class Monitor:
                 print("[ALERT] Low temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="low")
                 self.alert_sent_low = True
+            
+            if self._is_time_for_daily_alert():
+                if self.last_daily_low_alert_date != today:
+                    print("[DAILY ALERT] Low temperature still active.")
+                    send_email_alert(temperature, humidity, alert_type="daily_low")
+                    self.last_daily_low_alert_date = today
         
         elif self.alert_sent_low and temperature >= low_reset:
             print("[INFO] Low temperature recovered.")
+            send_email_alert(temperature, humidity, alert_type="recovered_low")
             self.alert_sent_low = False
 
         self.hardware.set_led(self.alert_sent_high or self.alert_sent_low)
@@ -59,7 +79,7 @@ class Monitor:
         print("[START] Monitoring Started. Press Ctrl + C to stop.")
 
         try:
-            while True:
+            while self._running:
                 try:
                     temperature, humidity = self.hardware.read_sensor()
 
@@ -81,3 +101,13 @@ class Monitor:
 
         finally:
             self.hardware.cleanup()
+
+    def _is_time_for_daily_alert(self):
+        now = datetime.now()
+        target_time = datetime.strptime(DAILY_ALERT_TIME, "%H:%M").time()
+
+        return now.time() >= target_time
+
+    def stop(self):
+        print("[STOP] Shutdown signal received.")
+        self._running = False

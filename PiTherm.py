@@ -77,17 +77,7 @@ TODO: When main installer Implementation is done
 TODO: Some changes as per request, and bug fixes
 ! IMPORTANT: To be fixed right away
 
-- Daily sending of Email, if Temps are still well above High Threshold
-- Add an email sending feature when temps reach normal level 
-  after high temperature or low temperature
--  Add one more decimal point
 - Logging Catch for any Hardware Hiccups
-
-? Edge Cases:
-
-- Since Alarm states are permanent, what if it's not resolved
-  during non work hours? Should there still be sending of email
-  alert after some time?
 
 """
 import sys
@@ -125,15 +115,23 @@ except ImportError:
 from src.pitherm.hardware import HardwareController
 from src.pitherm.monitor import Monitor
 from src.pitherm.logging_service import start_scheduler
-from src.pitherm.config import validate_env
+from src.pitherm.config import validate_env, print_config
+import signal
 
 validate_env()
+print_config()
 
 def main():
     print(f"[START] Using python: {sys.executable}")
 
     hardware = HardwareController()
     monitor = Monitor(hardware)
+
+    def handle_shutdown(signum, frame):
+        monitor.stop()
+
+    signal.signal(signal.SIGINT, handle_shutdown)
+    signal.signal(signal.SIGTERM, handle_shutdown)
 
     start_scheduler()
     monitor.run()
