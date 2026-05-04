@@ -1,5 +1,6 @@
 import platform
 from src.pitherm.config import ALLOW_FAKE_HARDWARE
+import time
 
 HARDWARE_AVAILABLE = False
 
@@ -60,7 +61,14 @@ class HardwareController:
 
         if ALLOW_FAKE_HARDWARE:
             print("[WARN] Using fake hardware reading.")
-            return 24.0, 50.0
+            t = int(time.time()) % 60
+
+            if t < 20:
+                return 26.0, 50.0
+            elif t < 40:
+                return 22.0, 50.0
+            else:
+                return 18.0, 50.0
 
         raise RuntimeError("Hardware is not ready and fake hardware is disabled.")
 
