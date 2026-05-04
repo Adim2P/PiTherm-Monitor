@@ -119,9 +119,10 @@ except ImportError:
 from src.pitherm.hardware import HardwareController
 from src.pitherm.monitor import Monitor
 from src.pitherm.logging_service import start_scheduler
-from src.pitherm.config import validate_env
+from src.pitherm.config import validate_env, print_config
 
 validate_env()
+print_config()
 
 def main():
     print(f"[START] Using python: {sys.executable}")
