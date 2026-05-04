@@ -45,7 +45,7 @@ class Monitor:
                 send_email_alert(temperature, humidity, alert_type="high")
                 self.alert_sent_high = True
             
-            if self._is_time_for_daily_alert():
+            elif self._is_time_for_daily_alert():
                 if self.last_daily_high_alert_date != today:
                     print("[DAILY ALERT] High temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_high")
@@ -62,7 +62,7 @@ class Monitor:
                 send_email_alert(temperature, humidity, alert_type="low")
                 self.alert_sent_low = True
             
-            if self._is_time_for_daily_alert():
+            elif self._is_time_for_daily_alert():
                 if self.last_daily_low_alert_date != today:
                     print("[DAILY ALERT] Low temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_low")
