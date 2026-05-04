@@ -21,6 +21,11 @@ class SMTPClient:
         return server
     
     def send(self, subject, body, is_html=False, attachment=None):
+        if not config.EMAIL_ENABLED:
+            print("[TEST MODE] Email skipped.")
+            print(f"[TEST EMAIL] Subject: {subject}")
+            return True
+        
         if not config.is_smtp_configured():
             print("[WARN] SMTP not configured. Email skipped.")
             return False
