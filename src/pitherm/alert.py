@@ -1,7 +1,16 @@
 from src.pitherm.smtp_client import SMTPClient
 
 def send_email_alert(temp, hum, alert_type="high"):
-    subject = "ALERT: High Temperature" if alert_type == "high" else "ALERT: Low temperature"
+    SUBJECT_MAP = {
+        "high": "ALERT: High Temperature",
+        "low": "ALERT: Low Temperature",
+        "recovered_high": "RESOLVED: Temperature Back to Normal (High)",
+        "recovered_low": "RESOLVED: Temperature Back to Normal (Low)",
+        "daily_high": "REMINDER: High Temperature Still Active",
+        "daily_low": "REMINDER: Low Temperature Still Active"
+    }
+
+    subject = SUBJECT_MAP.get(alert_type, "Temperature Alert")
 
     body = f"""
     <p><strong>Server Room Temperature Alert:</strong></p>
