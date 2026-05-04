@@ -138,6 +138,7 @@ def send_weekly_report(now=None, sender=None):
         return False
 
     subject = f"Weekly Temp Report - {week_str}"
+    print(f"[REPORT] Sending weekly report for {week_str}.")
     body = f"""
     <p>Attached is the temperature and humidity log for {week_str}.</p>
     <p>- Raspberry Pi Monitor</p>
@@ -157,12 +158,17 @@ def send_weekly_report(now=None, sender=None):
     if sender is None:
         sender = SMTPClient()
     
-    return sender.send(
+    sent = sender.send(
         subject, 
         body, 
         is_html=True, 
         attachment=attachment
     )
+
+    if sent:
+        print(f"[REPORT] Weekly report sent for {week_str}.")
+
+    return sent
 
 def check_and_send_weekly_report(now=None, sender=None):
     global _last_report_week

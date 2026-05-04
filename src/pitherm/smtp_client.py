@@ -63,7 +63,7 @@ class SMTPClient:
             server = self._connect(smtp_host, int(smtp_port))
             server.sendmail(smtp_from, recipients, msg.as_string())
             server.quit()
-            print("[OK] Email sent via SMTPClient.")
+            print(f"[OK] Email sent via SMTPClient. Subject: {subject}")
             return True
         
         except Exception as e:
