@@ -27,7 +27,7 @@ class Monitor:
         low_reset = TEMP_THRESHOLD_LOW + TEMP_HYSTERESIS
         today = datetime.now().date()
         
-        print(f"[DATA] Temp: {temperature:.1f}°C | Humidity: {humidity:.1f}%")
+        print(f"[DATA] Temp: {temperature:.2f}°C | Humidity: {humidity:.2f}%")
 
         self.hardware.update_lcd(temperature, humidity)
         current_time = time.time()

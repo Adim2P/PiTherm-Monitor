@@ -16,8 +16,8 @@ def send_email_alert(temp, hum, alert_type="high"):
     <p><strong>Server Room Temperature Alert:</strong></p>
 
     <p>
-    Temperature: {temp:.1f}°C<br>
-    Humidity: {hum:.1f}%
+    Temperature: {temp:.2f}°C<br>
+    Humidity: {hum:.2f}%
     </p>
 
     <p>- Raspberry Pi Temperature Monitor</p>

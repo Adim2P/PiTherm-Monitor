@@ -81,9 +81,9 @@ class HardwareController:
 
         if self.hardware_ready and lcd is not None:
             lcd.clear()
-            lcd.write_string(f"Temp: {temp:.1f}C")
+            lcd.write_string(f"Temp: {temp:.2f}C")
             lcd.crlf()
-            lcd.write_string(f"Hum : {hum:.1f}%")
+            lcd.write_string(f"Hum : {hum:.2f}%")
 
     def cleanup(self):
         lcd = self.lcd
