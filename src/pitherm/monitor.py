@@ -44,6 +44,7 @@ class Monitor:
                 print("[ALERT] High Temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="high")
                 self.alert_sent_high = True
+                self.last_daily_high_alert_date = today
             
             elif self._is_time_for_daily_alert():
                 if self.last_daily_high_alert_date != today:
@@ -61,6 +62,7 @@ class Monitor:
                 print("[ALERT] Low temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="low")
                 self.alert_sent_low = True
+                self.last_daily_low_alert_date = today
             
             elif self._is_time_for_daily_alert():
                 if self.last_daily_low_alert_date != today:
