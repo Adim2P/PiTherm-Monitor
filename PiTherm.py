@@ -1,6 +1,9 @@
 """
 TODO: Priority to Implement
 
+[ ] Implement CI/CD Pipeline
+[ ] Implement Timestamp Logging don't rely on output.log
+
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
     - Set WorkingDirectory to project root
