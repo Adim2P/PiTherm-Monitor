@@ -2,6 +2,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from src.pitherm import config
 import smtplib
+from src.pitherm.logger import logger
 
 def build_recipients(primary):
     cc_list = [e.strip() for e in config.SMTP_CC.split(",")] if config.SMTP_CC else []
@@ -22,12 +23,12 @@ class SMTPClient:
     
     def send(self, subject, body, is_html=False, attachment=None):
         if not config.EMAIL_ENABLED:
-            print("[TEST MODE] Email skipped.")
-            print(f"[TEST EMAIL] Subject: {subject}")
+            logger.info("[TEST MODE] Email skipped.")
+            logger.info(f"[TEST EMAIL] Subject: {subject}")
             return True
         
         if not config.is_smtp_configured():
-            print("[WARN] SMTP not configured. Email skipped.")
+            logger.warning("SMTP not configured. Email skipped.")
             return False
 
         smtp_host = config.SMTP_HOST
@@ -41,7 +42,7 @@ class SMTPClient:
             smtp_from is None or
             smtp_recipient is None
         ):
-            print("[WARN] SMTP not configured. Email skipped.")
+            logger.warning("SMTP not configured. Email skipped.")
             return False
 
         primary_to, cc_list, recipients = build_recipients(smtp_recipient)
@@ -63,9 +64,9 @@ class SMTPClient:
             server = self._connect(smtp_host, int(smtp_port))
             server.sendmail(smtp_from, recipients, msg.as_string())
             server.quit()
-            print(f"[OK] Email sent via SMTPClient. Subject: {subject}")
+            logger.info(f"[OK] Email sent via SMTPClient. Subject: {subject}")
             return True
         
         except Exception as e:
-            print("[ERROR] SMTPClient failed:", e)
+            logger.error("SMTPClient failed:", e)
             return False

@@ -85,6 +85,7 @@ TODO: Some changes as per request, and bug fixes
 """
 import sys
 import os
+from src.pitherm.logger import logger
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 VENV_PATH = os.path.join(PROJECT_ROOT, "venv")
@@ -93,26 +94,26 @@ def is_venv():
     return sys.prefix != sys.base_prefix
 
 if not is_venv():
-    print("[ERROR] Not running inside a virtual environment.")
+    logger.error("Not running inside a virtual environment.")
     
     if not os.path.exists(VENV_PATH):
-        print("[HINT] Project is not set up yet.")
-        print("Run: python setup.py install")
+        logger.info("[HINT] Project is not set up yet.")
+        logger.info("Run: python setup.py install")
     else:
-        print("[HINT] Activate your venv first:")
+        logger.info("[HINT] Activate your venv first:")
         if os.name == "nt":
-            print(" venv\\Scripts\\activate")
+            logger.info(" venv\\Scripts\\activate")
         else:
-            print(" source venv/bin/activate")
+            logger.info(" source venv/bin/activate")
 
-    print("\nThen Run: python PiTherm.py")
+    logger.info("\nThen Run: python PiTherm.py")
     exit(1)
 
 try:
     from dotenv import load_dotenv
 except ImportError:
-    print("[ERROR] Required dependencies not installed.")
-    print("Run: python setup.py install")
+    logger.error("Required dependencies not installed.")
+    logger.info("Run: python setup.py install")
     exit(1)
 
 from src.pitherm.hardware import HardwareController
@@ -125,7 +126,7 @@ validate_env()
 print_config()
 
 def main():
-    print(f"[START] Using python: {sys.executable}")
+    logger.info(f"[START] Using python: {sys.executable}")
 
     hardware = HardwareController()
     monitor = Monitor(hardware)

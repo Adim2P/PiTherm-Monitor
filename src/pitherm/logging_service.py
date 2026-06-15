@@ -9,6 +9,7 @@ from src.pitherm.smtp_client import SMTPClient
 from email.mime.application import MIMEApplication
 import csv
 import shutil
+from src.pitherm.logger import logger
 
 _last_report_week = None
 _excel_lock = threading.Lock()
@@ -64,7 +65,7 @@ def log_to_csv_fallback(temp, hum):
             temp,
             hum
         ])
-    print("[FALLBACK] Logged reading to CSV.")
+    logger.warning("[FALLBACK] Logged reading to CSV.")
 
 def ensure_log_directories():
     os.makedirs(CURRENT_DIR, exist_ok=True)
@@ -90,7 +91,7 @@ def archive_old_logs():
                 dst_path = os.path.join(ARCHIVE_DIR, file)
 
                 shutil.move(src_path, dst_path)
-                print(f"[ARCHIVE] Moved {file} to archive.")
+                logger.info(f"[ARCHIVE] Moved {file} to archive.")
 
 def log_to_excel(temp, hum):
     ensure_log_directories()
@@ -121,7 +122,7 @@ def log_to_excel(temp, hum):
             ])
             wb.save(filename)
         except Exception as e:
-            print("[CRITICAL] Excel logging failed. Switching to CSV Fallback:", e)
+            logger.error("Excel logging failed. Switching to CSV Fallback:", e)
             log_to_csv_fallback(temp, hum)
 
 def send_weekly_report(now=None, sender=None):
@@ -134,11 +135,11 @@ def send_weekly_report(now=None, sender=None):
         filename = find_weekly_report_file(week_str)
 
     if filename is None:
-        print(f"[WARN] No Excel file to send for {week_str}.")
+        logger.warning(f"No Excel file to send for {week_str}.")
         return False
 
     subject = f"Weekly Temp Report - {week_str}"
-    print(f"[REPORT] Sending weekly report for {week_str}.")
+    logger.info(f"[REPORT] Sending weekly report for {week_str}.")
     body = f"""
     <p>Attached is the temperature and humidity log for {week_str}.</p>
     <p>- Raspberry Pi Monitor</p>
@@ -166,7 +167,7 @@ def send_weekly_report(now=None, sender=None):
     )
 
     if sent:
-        print(f"[REPORT] Weekly report sent for {week_str}.")
+        logger.info(f"[REPORT] Weekly report sent for {week_str}.")
 
     return sent
 

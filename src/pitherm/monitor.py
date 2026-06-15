@@ -11,6 +11,7 @@ from src.pitherm.logging_service import log_to_excel
 from src.pitherm.dashboard import send_to_adafruit
 from datetime import datetime
 from src.pitherm.config import DAILY_ALERT_TIME
+from src.pitherm.logger import logger
 
 class Monitor:
     def __init__(self, hardware):
@@ -28,7 +29,7 @@ class Monitor:
         low_reset = TEMP_THRESHOLD_LOW + TEMP_HYSTERESIS
         today = datetime.now().date()
         
-        print(f"[DATA] Temp: {temperature:.2f}°C | Humidity: {humidity:.2f}%")
+        logger.info(f"[DATA] Temp: {temperature:.2f}°C | Humidity: {humidity:.2f}%")
 
         self.hardware.update_lcd(temperature, humidity)
         current_time = time.time()
@@ -41,44 +42,44 @@ class Monitor:
 
         if temperature >= TEMP_THRESHOLD_HIGH:
             if not self.alert_sent_high:
-                print("[ALERT] High Temperature threshold reached.")
+                logger.warning("[ALERT] High Temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="high")
                 self.alert_sent_high = True
                 self.last_daily_high_alert_date = today
             
             elif self._is_time_for_daily_alert():
                 if self.last_daily_high_alert_date != today:
-                    print("[DAILY ALERT] High temperature still active.")
+                    logger.warning("[DAILY ALERT] High temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_high")
                     self.last_daily_high_alert_date = today
 
         elif self.alert_sent_high and temperature <= high_reset:
-            print("[INFO] High temperature recovered.")
+            logger.info("[INFO] High temperature recovered.")
             send_email_alert(temperature, humidity, alert_type="recovered_high")
             self.alert_sent_high = False
 
         if temperature <= TEMP_THRESHOLD_LOW:
             if not self.alert_sent_low:
-                print("[ALERT] Low temperature threshold reached.")
+                logger.warning("[ALERT] Low temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="low")
                 self.alert_sent_low = True
                 self.last_daily_low_alert_date = today
             
             elif self._is_time_for_daily_alert():
                 if self.last_daily_low_alert_date != today:
-                    print("[DAILY ALERT] Low temperature still active.")
+                    logger.warning("[DAILY ALERT] Low temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_low")
                     self.last_daily_low_alert_date = today
         
         elif self.alert_sent_low and temperature >= low_reset:
-            print("[INFO] Low temperature recovered.")
+            logger.info("Low temperature recovered.")
             send_email_alert(temperature, humidity, alert_type="recovered_low")
             self.alert_sent_low = False
 
         self.hardware.set_led(self.alert_sent_high or self.alert_sent_low)
 
     def run(self):
-        print("[START] Monitoring Started. Press Ctrl + C to stop.")
+        logger.info("[START] Monitoring Started. Press Ctrl + C to stop.")
 
         try:
             while self._running:
@@ -89,17 +90,17 @@ class Monitor:
                         try:
                             self.process_reading(temperature, humidity)
                         except Exception as e:
-                            print("[ERROR] Processing failure:", e)
+                            logger.error("Processing failure:", e)
                     else:
-                        print("[WARN] Sensor read failed.")
+                        logger.warning("Sensor read failed.")
                 
                 except RuntimeError as err:
-                    print(f"[ERROR] DHT read error: {err}")
+                    logger.error(f"DHT read error: {err}")
                 
                 time.sleep(READ_INTERVAL_SECONDS)
 
         except KeyboardInterrupt:
-            print("\n[STOP] Monitoring stopped by user.")
+            logger.info("\n[STOP] Monitoring stopped by user.")
 
         finally:
             self.hardware.cleanup()
@@ -111,5 +112,5 @@ class Monitor:
         return now.time() >= target_time
 
     def stop(self):
-        print("[STOP] Shutdown signal received.")
+        logger.info("[STOP] Shutdown signal received.")
         self._running = False
