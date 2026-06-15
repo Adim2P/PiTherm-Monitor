@@ -12,16 +12,35 @@ from src.pitherm.dashboard import send_to_adafruit
 from datetime import datetime
 from src.pitherm.config import DAILY_ALERT_TIME
 from src.pitherm.logger import logger
+from src.pitherm.state_manager import state
 
 class Monitor:
     def __init__(self, hardware):
         self.hardware = hardware
-        self.alert_sent_high = False
-        self.alert_sent_low = False
         self._last_log_time = 0
-        self.last_daily_high_alert_date = None
-        self.last_daily_low_alert_date = None
         self._running = True
+        self.alert_sent_high = state.get(
+            "alert_sent_high",
+            False
+        )
+        self.alert_sent_low = state.get(
+            "alert_sent_low",
+            False
+        )
+        self.last_daily_high_alert_date = state.get(
+            "last_daily_high_alert_date"
+        )
+        self.last_daily_low_alert_date = state.get(
+            "last_daily_low_alert_date"
+        )
+
+        logger.info(
+            f"[STATE] Restored alert_sent_high={self.alert_sent_high}"
+        )
+
+        logger.info(
+            f"[STATE] Restored alert_sent_low={self.alert_sent_low}"
+        )
     
     def process_reading(self, temperature, humidity):
         
@@ -45,36 +64,47 @@ class Monitor:
                 logger.warning("[ALERT] High Temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="high")
                 self.alert_sent_high = True
+                state.set("alert_sent_high", True)
                 self.last_daily_high_alert_date = today
+                state.set(
+                    "last_daily_high_alert_date",
+                    str(today)
+                )
             
             elif self._is_time_for_daily_alert():
                 if self.last_daily_high_alert_date != today:
                     logger.warning("[DAILY ALERT] High temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_high")
-                    self.last_daily_high_alert_date = today
+                    self.last_daily_high_alert_date = str(today)
+                    state.set("last_daily_high_alert_date", str(today))
 
         elif self.alert_sent_high and temperature <= high_reset:
             logger.info("[INFO] High temperature recovered.")
             send_email_alert(temperature, humidity, alert_type="recovered_high")
             self.alert_sent_high = False
+            state.set("alert_sent_high", False)
 
         if temperature <= TEMP_THRESHOLD_LOW:
             if not self.alert_sent_low:
                 logger.warning("[ALERT] Low temperature threshold reached.")
                 send_email_alert(temperature, humidity, alert_type="low")
                 self.alert_sent_low = True
+                state.set("alert_sent_low", True)
                 self.last_daily_low_alert_date = today
-            
+                state.set("last_daily_low_alert_date", str(today))
+
             elif self._is_time_for_daily_alert():
                 if self.last_daily_low_alert_date != today:
                     logger.warning("[DAILY ALERT] Low temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_low")
                     self.last_daily_low_alert_date = today
+                    state.set("last_daily_low_alert_date", str(today))
         
         elif self.alert_sent_low and temperature >= low_reset:
             logger.info("Low temperature recovered.")
             send_email_alert(temperature, humidity, alert_type="recovered_low")
             self.alert_sent_low = False
+            state.set("alert_sent_low", False)
 
         self.hardware.set_led(self.alert_sent_high or self.alert_sent_low)
 
