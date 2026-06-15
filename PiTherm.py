@@ -1,7 +1,11 @@
 """
 TODO: Priority to Implement
 
-[ ] Persistent State Flagging
+[ ] Add feature that lets changing of temps even if program
+    is running
+
+[ ] Add feature that restarts program every Saturday and runs
+    the script on its own
 
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
