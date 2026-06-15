@@ -68,5 +68,8 @@ class SMTPClient:
             return True
         
         except Exception as e:
-            logger.error("SMTPClient failed:", e)
+            logger.error(
+                f"SMTPClient failed: {e}", 
+                exc_info=True
+            )
             return False

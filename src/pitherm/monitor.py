@@ -120,7 +120,10 @@ class Monitor:
                         try:
                             self.process_reading(temperature, humidity)
                         except Exception as e:
-                            logger.error("Processing failure:", e)
+                            logger.error(
+                                f"Processing failure: {e}",
+                                exc_info=True
+                            )
                     else:
                         logger.warning("Sensor read failed.")
                 

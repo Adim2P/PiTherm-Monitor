@@ -49,7 +49,10 @@ class HardwareController:
             logger.info("[OK] Hardware initialized successfully.")
 
         except Exception as e:
-            logger.warning("Hardware initialization failed:", e)
+            logger.warning(
+                f"Hardware initialization failed: {e}", 
+                exc_info=True
+            )
             self.dht_device = None
             self.lcd = None
             self.hardware_ready = False

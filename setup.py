@@ -86,7 +86,10 @@ def uninstall():
         logger.error(" - Close VS Code or any running Python Scipts")
     
     except Exception as e:
-        logger.error("Unexpected error", e)
+        logger.error(
+            f"Unexpected error: {e}", 
+            exc_info=True
+        )
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

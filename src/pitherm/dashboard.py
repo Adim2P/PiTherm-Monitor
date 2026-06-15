@@ -28,4 +28,7 @@ def send_to_adafruit(temp, hum):
             logger.warning(f"Adafruit error: {temp_res.text} | {hum_res.text}")
 
     except Exception as err:
-        logger.error("Adafruit exception:", err)
+        logger.error(
+            f"Adafruit exception: {err}", 
+            exc_info=True
+        )

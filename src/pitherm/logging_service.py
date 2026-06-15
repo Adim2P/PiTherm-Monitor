@@ -122,7 +122,10 @@ def log_to_excel(temp, hum):
             ])
             wb.save(filename)
         except Exception as e:
-            logger.error("Excel logging failed. Switching to CSV Fallback:", e)
+            logger.error(
+                f"Excel logging failed. Switching to CSV Fallback: {e}", 
+                exc_info=True
+            )
             log_to_csv_fallback(temp, hum)
 
 def send_weekly_report(now=None, sender=None):
