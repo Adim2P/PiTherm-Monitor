@@ -1,6 +1,7 @@
 import platform
 from src.pitherm.config import ALLOW_FAKE_HARDWARE
 import time
+from src.pitherm.logger import logger
 
 HARDWARE_AVAILABLE = False
 
@@ -22,8 +23,13 @@ class HardwareController:
         self.led_pin = 17
         self.hardware_ready = False
 
+        if ALLOW_FAKE_HARDWARE:
+            logger.warning(
+                "[DEV] Fake hardware mode enabled."
+            )
+
         if not HARDWARE_AVAILABLE:
-            print("[WARN] Hardware libraries not available.")
+            logger.warning("Hardware libraries not available.")
             return
 
         try:
@@ -45,10 +51,13 @@ class HardwareController:
             self.lcd.write_string("PiTherm Ready")
 
             self.hardware_ready = True
-            print("[OK] Hardware initialized successfully.")
+            logger.info("[OK] Hardware initialized successfully.")
 
         except Exception as e:
-            print("[WARN] Hardware initialization failed:", e)
+            logger.error(
+                f"Hardware initialization failed: {e}", 
+                exc_info=True
+            )
             self.dht_device = None
             self.lcd = None
             self.hardware_ready = False
@@ -60,7 +69,6 @@ class HardwareController:
             return dht_device.temperature, dht_device.humidity
 
         if ALLOW_FAKE_HARDWARE:
-            print("[WARN] Using fake hardware reading.")
             t = int(time.time()) % 60
 
             if t < 20:

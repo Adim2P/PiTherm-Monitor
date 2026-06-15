@@ -3,6 +3,7 @@ import sys
 from dotenv import load_dotenv
 import configparser
 from datetime import datetime
+from src.pitherm.logger import logger
 
 # ENVs
 
@@ -15,7 +16,7 @@ _config = configparser.ConfigParser()
 
 def load_ini():
     if not os.path.exists(CONFIG_FILE):
-        print("[INFO] config.ini not found. Creating default config.")
+        logger.info("[INFO] config.ini not found. Creating default config.")
 
         _config["thresholds"] = {
             "temp_high": "25.0",
@@ -57,15 +58,10 @@ ALLOW_FAKE_HARDWARE = os.getenv("ALLOW_FAKE_HARDWARE", "").strip().lower() in (
 # Global Variables
 
 TEMP_THRESHOLD_HIGH = float(_config["thresholds"]["temp_high"])
-#TEMP_THRESHOLD_HIGH = 25.0
 TEMP_THRESHOLD_LOW = float(_config["thresholds"]["temp_low"])
-#TEMP_THRESHOLD_LOW = 19.0
 READ_INTERVAL_SECONDS = int(_config["intervals"]["read_seconds"])
-#READ_INTERVAL_SECONDS = 30
 LOG_INTERVAL_SECONDS = int(_config["intervals"]["log_seconds"])
-#LOG_INTERVAL_SECONDS = 300
 TEMP_HYSTERESIS = float(_config["thresholds"]["hysteresis"])
-#TEMP_HYSTERESIS = 1.0
 DAILY_ALERT_TIME = _config["alerts"]["daily_alert_time"]
 EMAIL_ENABLED = _config["alerts"]["email_enabled"].lower() in ("1", "true", "yes")
 
@@ -92,7 +88,7 @@ def validate_env():
             break
 
     if not smtp_started:
-        print("[INFO] SMTP not configured. Email features disabled.")
+        logger.info("SMTP not configured. Email features disabled.")
         return
 
     missing = []
@@ -103,29 +99,29 @@ def validate_env():
             missing.append(var)
     
     if missing:
-        print("[ERROR] Missing required environment variables:")
+        logger.error("Missing required environment variables:")
         for var in missing:
-            print(f" - {var}")
+            logger.info(f" - {var}")
         
-        print("\n[HINT] SMTP is optional, but partial SMTP config is not.")
-        print("[HINT] Fill in SMTP_HOST, SMTP_PORT, SMTP_FROM, and SMTP_RECIPIENT, or leave all blank.")
+        logger.info("\n[HINT] SMTP is optional, but partial SMTP config is not.")
+        logger.info("[HINT] Fill in SMTP_HOST, SMTP_PORT, SMTP_FROM, and SMTP_RECIPIENT, or leave all blank.")
         sys.exit(1)
 
     smtp_port_value = os.getenv("SMTP_PORT")
 
     if smtp_port_value is None:
-        print("[ERROR] SMTP_PORT must be set when SMTP is configured.")
+        logger.error("SMTP_PORT must be set when SMTP is configured.")
         sys.exit(1)
 
     try:
         int(smtp_port_value)
     except ValueError:
-        print("[ERROR] SMTP_PORT must be a valid number.")
+        logger.error("SMTP_PORT must be a valid number.")
         sys.exit(1)
 
 def print_config():
-    print(f"[CONFIG] High={TEMP_THRESHOLD_HIGH}, Low={TEMP_THRESHOLD_LOW}")
-    print(f"[CONFIG] Hysteresis={TEMP_HYSTERESIS}")
-    print(f"[CONFIG] Daily Alert Time={DAILY_ALERT_TIME}")
-    print(f"[CONFIG] Email Enabled={EMAIL_ENABLED}")
-    print(f"[CONFIG] Fake Hardware Enabled={ALLOW_FAKE_HARDWARE}")
+    logger.info(f"[CONFIG] High={TEMP_THRESHOLD_HIGH}, Low={TEMP_THRESHOLD_LOW}")
+    logger.info(f"[CONFIG] Hysteresis={TEMP_HYSTERESIS}")
+    logger.info(f"[CONFIG] Daily Alert Time={DAILY_ALERT_TIME}")
+    logger.info(f"[CONFIG] Email Enabled={EMAIL_ENABLED}")
+    logger.info(f"[CONFIG] Fake Hardware Enabled={ALLOW_FAKE_HARDWARE}")
