@@ -23,6 +23,11 @@ class HardwareController:
         self.led_pin = 17
         self.hardware_ready = False
 
+        if ALLOW_FAKE_HARDWARE:
+            logger.warning(
+                "[DEV] Fake hardware mode enabled."
+            )
+
         if not HARDWARE_AVAILABLE:
             logger.warning("Hardware libraries not available.")
             return
@@ -49,7 +54,7 @@ class HardwareController:
             logger.info("[OK] Hardware initialized successfully.")
 
         except Exception as e:
-            logger.warning(
+            logger.error(
                 f"Hardware initialization failed: {e}", 
                 exc_info=True
             )
@@ -64,7 +69,6 @@ class HardwareController:
             return dht_device.temperature, dht_device.humidity
 
         if ALLOW_FAKE_HARDWARE:
-            logger.warning("Using fake hardware reading.")
             t = int(time.time()) % 60
 
             if t < 20:
