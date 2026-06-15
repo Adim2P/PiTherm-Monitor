@@ -46,7 +46,7 @@ class Monitor:
         
         high_reset = TEMP_THRESHOLD_HIGH - TEMP_HYSTERESIS
         low_reset = TEMP_THRESHOLD_LOW + TEMP_HYSTERESIS
-        today = datetime.now().date()
+        today = str(datetime.now().date())
         
         logger.info(f"[DATA] Temp: {temperature:.2f}°C | Humidity: {humidity:.2f}%")
 
@@ -68,18 +68,21 @@ class Monitor:
                 self.last_daily_high_alert_date = today
                 state.set(
                     "last_daily_high_alert_date",
-                    str(today)
+                    today
                 )
             
             elif self._is_time_for_daily_alert():
                 if self.last_daily_high_alert_date != today:
                     logger.warning("[DAILY ALERT] High temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_high")
-                    self.last_daily_high_alert_date = str(today)
-                    state.set("last_daily_high_alert_date", str(today))
+                    self.last_daily_high_alert_date = today
+                    state.set(
+                        "last_daily_high_alert_date", 
+                        today
+                    )
 
         elif self.alert_sent_high and temperature <= high_reset:
-            logger.info("[INFO] High temperature recovered.")
+            logger.info("High temperature recovered.")
             send_email_alert(temperature, humidity, alert_type="recovered_high")
             self.alert_sent_high = False
             state.set("alert_sent_high", False)
@@ -91,14 +94,20 @@ class Monitor:
                 self.alert_sent_low = True
                 state.set("alert_sent_low", True)
                 self.last_daily_low_alert_date = today
-                state.set("last_daily_low_alert_date", str(today))
+                state.set(
+                    "last_daily_low_alert_date", 
+                    today
+                )
 
             elif self._is_time_for_daily_alert():
                 if self.last_daily_low_alert_date != today:
                     logger.warning("[DAILY ALERT] Low temperature still active.")
                     send_email_alert(temperature, humidity, alert_type="daily_low")
                     self.last_daily_low_alert_date = today
-                    state.set("last_daily_low_alert_date", str(today))
+                    state.set(
+                        "last_daily_low_alert_date", 
+                        today
+                    )
         
         elif self.alert_sent_low and temperature >= low_reset:
             logger.info("Low temperature recovered.")
