@@ -1,8 +1,7 @@
 """
 TODO: Priority to Implement
 
-[ ] Implement CI/CD Pipeline
-[ ] Implement Timestamp Logging don't rely on output.log
+[ ] Persistent State Flagging
 
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
@@ -13,6 +12,8 @@ TODO: Priority to Implement
     - Configure Restart=always and RestartSec=5
     - Validate service status after registration
 
+[ ] Implement CI/CD Pipeline
+
 [ ] Implement clean uninstall capability
     - Stop running service
     - Disable service from startup
@@ -20,6 +21,9 @@ TODO: Priority to Implement
     - Reload systemd daemon
     - Remove virtual environment (venv)
     - Ensure no leftover files or processes remain
+
+[ ] Implement Dashboard after Persistent Flag States using local
+    native UI
 
 ------------------------------------------------------------
 
@@ -51,36 +55,12 @@ TODO: When main installer Implementation is done
     - Track last successful Excel write timestamp
     - Expose state internally for monitoring
 
-[ ] Heartbeat monitoring (Structure Only – No API Integration Yet)
-    - Track system uptime
-    - Track last sensor reading timestamp
-    - Track hardware_ready state
-    - Track excel_faulted state
-    - Prepare structured health report payload (no sending yet)
-
-[ ] Watchdog timer
-    - Detect stalled main monitoring loop
-    - Track last successful loop execution timestamp
-    - Log watchdog trigger event
-    - Prepare hook for future notification integration
-
 [ ] Integrate fallback failure alerting
     - Trigger alert when Excel logging fails
     - Hook alert into new notification API
     - Ensure alert sends only once per failure event
     - Prevent alert spam during repeated failures
     - Reset failure state when Excel logging recovers
-
-[ ] Enable full heartbeat notification delivery
-    - Send daily health report via new API
-    - Include uptime, hardware_ready, excel_faulted
-    - Include last successful Excel write timestamp
-    - Include last sensor reading timestamp
-
-TODO: Some changes as per request, and bug fixes
-! IMPORTANT: To be fixed right away
-
-- Logging Catch for any Hardware Hiccups
 
 """
 import sys
