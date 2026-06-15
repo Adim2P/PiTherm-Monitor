@@ -6,3 +6,4 @@ pycache/
 logs/
 config.ini
 .env.backup
+data/
