@@ -72,7 +72,7 @@ class StateManager:
             self._state[key] = value
 
             logger.info(
-                f"[STATE Updated '{key}' = {value}"
+                f"[STATE] Updated '{key}' = {value}"
             )
 
             self._save()
