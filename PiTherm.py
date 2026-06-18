@@ -1,11 +1,11 @@
 """
 TODO: Priority to Implement
 
-[ ] Add feature that lets changing of temps even if program
-    is running
+[ ] Implementation of Phase 2 for State Manager on Week Report
+    Tracking
 
-[ ] Add feature that restarts program every Saturday and runs
-    the script on its own
+[ ] Adding a Tolerance feature, that doesn't consider very big
+    or low temp differences from the normal, reading.
 
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
