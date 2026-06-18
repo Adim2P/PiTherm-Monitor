@@ -4,8 +4,8 @@ TODO: Priority to Implement
 [ ] Implementation of Phase 2 for State Manager on Week Report
     Tracking
 
-[ ] Adding a Tolerance feature, that doesn't consider very big
-    or low temp differences from the normal, reading.
+[ ] Adding a Sensor Validator, to filter out bad or garbage 
+    data feed from timing issues on DHT
 
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
@@ -46,25 +46,19 @@ TODO: When main installer Implementation is done
     - Log retry attempts during initialization
     - Only enter dev mode if all retries fail
 
+[ ] Logging health monitoring
+
+    - Track excel_faulted state
+    - Track last successful Excel write
+    - Alert when entering fallback mode
+    - Alert when Excel logging recovers
+    - Send only once per state change
+
 [ ] Improve LCD initialization validation
     - Detect I2C initialization failure explicitly
     - Attempt simple test write during startup
     - Log clear diagnostic message if LCD fails
-    - Consider fallback mode if only LCD fails but DHT works
-
-[ ] Implement logging failure state tracking
-    - Add boolean flag: excel_faulted
-    - Set to True when fallback is triggered
-    - Reset to False after successful Excel write
-    - Track last successful Excel write timestamp
-    - Expose state internally for monitoring
-
-[ ] Integrate fallback failure alerting
-    - Trigger alert when Excel logging fails
-    - Hook alert into new notification API
-    - Ensure alert sends only once per failure event
-    - Prevent alert spam during repeated failures
-    - Reset failure state when Excel logging recovers
+    - Consider fallback mode if only LCD fails but DHT works    
 
 """
 import sys
