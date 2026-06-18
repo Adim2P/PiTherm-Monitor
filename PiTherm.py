@@ -7,6 +7,10 @@ TODO: Priority to Implement
 [ ] Adding a Sensor Validator, to filter out bad or garbage 
     data feed from timing issues on DHT
 
+[ ] To add another column on excel weekly, remarks that says
+    (normal, high or low temps), Humidity checker as well
+    (40 - 60 optimal, below 40 or higher than 60 is a warning)
+
 [ ] Implement automatic systemd service registration (Linux only)
     - Dynamically generate pitherm.service
     - Set WorkingDirectory to project root
