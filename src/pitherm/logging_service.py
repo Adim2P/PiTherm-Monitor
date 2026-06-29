@@ -10,8 +10,8 @@ from email.mime.application import MIMEApplication
 import csv
 import shutil
 from src.pitherm.logger import logger
+from src.pitherm.state_manager import state
 
-_last_report_week = None
 _excel_lock = threading.Lock()
 BASE_LOG_DIR = "logs"
 CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
@@ -175,16 +175,32 @@ def send_weekly_report(now=None, sender=None):
     return sent
 
 def check_and_send_weekly_report(now=None, sender=None):
-    global _last_report_week
-
     if now is None:
         now = datetime.now()
 
-    current_week = now.isocalendar()[:2]
+    current_week = list(now.isocalendar()[:2])
 
-    if now.weekday() == 0 and now.hour >= 7 and _last_report_week != current_week:
-        if send_weekly_report(now=now, sender=sender):
-            _last_report_week = current_week
+    last_report_week =  state.get(
+        "last_report_week"
+    )
+
+    if (
+        now.weekday() == 0
+        and now.hour >= 7
+        and last_report_week != current_week
+    ):
+        if send_weekly_report(
+            now=now,
+            sender=sender
+        ):
+            state.set(
+                "last_report_week",
+                current_week
+            )
+
+            logger.info(
+                f"[STATE] Stored weekly report state: {current_week}"
+            )
 
 def run_scheduler():
     while True:
