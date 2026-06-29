@@ -1,9 +1,6 @@
 """
 TODO: Priority to Implement
 
-[ ] Implementation of Phase 2 for State Manager on Week Report
-    Tracking
-
 [ ] Adding a Sensor Validator, to filter out bad or garbage 
     data feed from timing issues on DHT
     
