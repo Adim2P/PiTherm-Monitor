@@ -1,8 +1,5 @@
 """
 TODO: Priority to Implement
-
-[ ] Adding a Sensor Validator, to filter out bad or garbage 
-    data feed from timing issues on DHT
     
 [ ] To add another column on excel weekly, remarks that says
     (normal, high or low temps), Humidity checker as well
