@@ -2,7 +2,6 @@ import os
 import sys
 from dotenv import load_dotenv
 import configparser
-from datetime import datetime
 from src.pitherm.logger import logger
 
 # ENVs
@@ -34,6 +33,15 @@ def load_ini():
             "email_enabled": "true"
         }
 
+        _config["validation"] = {
+            "temp_min_valid": "0.0",
+            "temp_max_valid": "60.0",
+            "humidity_min_valid": "0.0",
+            "humidity_max_valid": "100.0",
+            "max_temp_jump": "8.0",
+            "max_humidity_jump": "25.0"
+        }
+
         with open(CONFIG_FILE, "w") as f:
             _config.write(f)
     
@@ -41,6 +49,8 @@ def load_ini():
         _config.read(CONFIG_FILE)
 
 load_ini()
+
+# Global Variables
 
 ADAFRUIT_IO_USERNAME = os.getenv("ADAFRUIT_IO_USERNAME")
 ADAFRUIT_IO_KEY = os.getenv("ADAFRUIT_IO_KEY")
@@ -54,23 +64,52 @@ ALLOW_FAKE_HARDWARE = os.getenv("ALLOW_FAKE_HARDWARE", "").strip().lower() in (
     "true",
     "yes",
 )
-
-# Global Variables
-
-TEMP_THRESHOLD_HIGH = float(_config["thresholds"]["temp_high"])
-TEMP_THRESHOLD_LOW = float(_config["thresholds"]["temp_low"])
-READ_INTERVAL_SECONDS = int(_config["intervals"]["read_seconds"])
-LOG_INTERVAL_SECONDS = int(_config["intervals"]["log_seconds"])
-TEMP_HYSTERESIS = float(_config["thresholds"]["hysteresis"])
+TEMP_THRESHOLD_HIGH = float(
+    _config["thresholds"]["temp_high"]
+)
+TEMP_THRESHOLD_LOW = float(
+    _config["thresholds"]["temp_low"]
+)
+READ_INTERVAL_SECONDS = int(
+    _config["intervals"]["read_seconds"]
+)
+LOG_INTERVAL_SECONDS = int(
+    _config["intervals"]["log_seconds"]
+)
+TEMP_HYSTERESIS = float(
+_config["thresholds"]["hysteresis"]
+)
 DAILY_ALERT_TIME = _config["alerts"]["daily_alert_time"]
-EMAIL_ENABLED = _config["alerts"]["email_enabled"].lower() in ("1", "true", "yes")
-
+EMAIL_ENABLED = _config["alerts"]["email_enabled"].lower() in (
+    "1", 
+    "true",
+    "yes"
+)
 SMTP_REQUIRED_ENV_VARS = [
     "SMTP_HOST",
     "SMTP_PORT",
     "SMTP_FROM",
     "SMTP_RECIPIENT",
 ]
+
+TEMP_MIN_VALID = float(
+    _config["validation"]["temp_min_valid"]
+)
+TEMP_MAX_VALID = float(
+    _config["validation"]["temp_max_valid"]
+)
+HUMIDITY_MIN_VALID = float(
+    _config["validation"]["humidity_min_valid"]
+)
+HUMIDITY_MAX_VALID = float(
+    _config["validation"]["humidity_max_valid"]
+)
+MAX_TEMP_JUMP = float(
+    _config["validation"]["max_temp_jump"]
+)
+MAX_HUMIDITY_JUMP = float(
+    _config["validation"]["max_humidity_jump"]
+)
 
 def is_smtp_configured():
     return all(
@@ -120,8 +159,30 @@ def validate_env():
         sys.exit(1)
 
 def print_config():
-    logger.info(f"[CONFIG] High={TEMP_THRESHOLD_HIGH}, Low={TEMP_THRESHOLD_LOW}")
-    logger.info(f"[CONFIG] Hysteresis={TEMP_HYSTERESIS}")
-    logger.info(f"[CONFIG] Daily Alert Time={DAILY_ALERT_TIME}")
-    logger.info(f"[CONFIG] Email Enabled={EMAIL_ENABLED}")
-    logger.info(f"[CONFIG] Fake Hardware Enabled={ALLOW_FAKE_HARDWARE}")
+    logger.info(
+        f"[CONFIG] High= {TEMP_THRESHOLD_HIGH}, Low={TEMP_THRESHOLD_LOW}"
+    )
+    logger.info(
+        f"[CONFIG] Hysteresis= {TEMP_HYSTERESIS}"
+    )
+    logger.info(
+        f"[CONFIG] Daily Alert Time= {DAILY_ALERT_TIME}"
+    )
+    logger.info(
+        f"[CONFIG] Email Enabled= {EMAIL_ENABLED}"
+    )
+    logger.info(
+        f"[CONFIG] Fake Hardware Enabled= {ALLOW_FAKE_HARDWARE}"
+    )
+    logger.info(
+        f"[CONFIG] Temp Validation= {TEMP_MIN_VALID}°C - {TEMP_MAX_VALID}°C"
+    )
+    logger.info(
+        f"[CONFIG] Humidity Validation= {HUMIDITY_MIN_VALID}% - {HUMIDITY_MAX_VALID}%"
+    )
+    logger.info(
+        f"[CONFIG] Max Temp Jump= {MAX_TEMP_JUMP}°C"
+    )
+    logger.info(
+        f"[CONFIG] Max Humidity Jump= {MAX_HUMIDITY_JUMP}%"
+    )
