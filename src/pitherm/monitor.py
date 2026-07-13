@@ -13,10 +13,12 @@ from datetime import datetime
 from src.pitherm.config import DAILY_ALERT_TIME
 from src.pitherm.logger import logger
 from src.pitherm.state_manager import state
+from src.pitherm.sensor_validator import SensorValidator
 
 class Monitor:
     def __init__(self, hardware):
         self.hardware = hardware
+        self.validator = SensorValidator()
         self._last_log_time = 0
         self._running = True
         self.alert_sent_high = state.get(
@@ -125,17 +127,36 @@ class Monitor:
                 try:
                     temperature, humidity = self.hardware.read_sensor()
 
-                    if temperature is not None and humidity is not None:
+                    if temperature is None or humidity is None:
+                        logger.warning(
+                            "[SENSOR] Sensor returned an empty string."
+                        )
+                    
+                    else:
                         try:
-                            self.process_reading(temperature, humidity)
+                            validation = self.validator.validate(
+                                temperature,
+                                humidity
+                            )
+
+                            if not validation.is_valid:
+                                logger.warning(
+                                    f"[VALIDATOR] Rejected sensor reading: "
+                                    f"{validation.reason}"
+                                )
+                            
+                            else:
+                                self.process_reading(
+                                    temperature,
+                                    humidity
+                                )
+
                         except Exception as e:
                             logger.error(
                                 f"Processing failure: {e}",
                                 exc_info=True
                             )
-                    else:
-                        logger.warning("Sensor read failed.")
-                
+                            
                 except RuntimeError as err:
                     logger.error(f"DHT read error: {err}")
                 
