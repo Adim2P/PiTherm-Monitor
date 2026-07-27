@@ -1,64 +1,40 @@
 """
 TODO: Priority to Implement
-    
-[ ] To add another column on excel weekly, remarks that says
-    (normal, high or low temps), Humidity checker as well
-    (40 - 60 optimal, below 40 or higher than 60 is a warning)
 
-[ ] Implement automatic systemd service registration (Linux only)
-    - Dynamically generate pitherm.service
-    - Set WorkingDirectory to project root
-    - Use venv Python binary in ExecStart
-    - Enable service on boot
-    - Start service immediately after install
-    - Configure Restart=always and RestartSec=5
-    - Validate service status after registration
+[ ] Implement graceful manual shutdown
+    - Handle SIGTERM and SIGINT
+    - Add a shutdown flag/event checked by the main loop
+    - Replace long blocking sleep with interruptible waiting
+    - Save runtime_state.json before exit
+    - Log shutdown request and successful shutdown
+    - Ensure repeated stop requests do not corrupt state
 
-[ ] Implement CI/CD Pipeline
+[ ] Implement SSH-safe manual start
+    - Create a control.py start command
+    - Launch PiTherm as a detached background process
+    - Use the project virtual environment Python binary
+    - Redirect stdout and stderr to log files
+    - Ensure PiTherm continues running after SSH logout
+    - Store the running process PID
+    - Prevent duplicate PiTherm instances
+    - Confirm that the process started successfully
 
-[ ] Implement clean uninstall capability
-    - Stop running service
-    - Disable service from startup
-    - Remove /etc/systemd/system/pitherm.service
-    - Reload systemd daemon
-    - Remove virtual environment (venv)
-    - Ensure no leftover files or processes remain
+[ ] Implement manual stop and status commands
+    - Add control.py stop
+    - Read the stored PID
+    - Verify that the PID belongs to PiTherm
+    - Send SIGTERM for graceful shutdown
+    - Wait for the process to exit
+    - Remove stale PID files
+    - Add control.py status
+    - Show whether PiTherm is running
+    - Show PID and last known runtime state
 
 [ ] Implement Dashboard after Persistent Flag States using local
     native UI
 
-------------------------------------------------------------
-
-TODO: When main installer Implementation is done
-
-[ ] Implement sensor failure detection
-    - Track consecutive failed reads
-    - Define MAX_SENSOR_FAILURE threshold
-    - Trigger hardware failure alert via new API
-    - Send alert only once per failure event
-    - Reset failure counter after successful sensor read
-
-[ ] Improve DHT hardware self-test robustness
-    - Retry initial sensor read 2–3 times before failing
-    - Add small delay between retries
-    - Log retry attempts during initialization
-    - Only enter dev mode if all retries fail
-
-[ ] Logging health monitoring
-
-    - Track excel_faulted state
-    - Track last successful Excel write
-    - Alert when entering fallback mode
-    - Alert when Excel logging recovers
-    - Send only once per state change
-
-[ ] Improve LCD initialization validation
-    - Detect I2C initialization failure explicitly
-    - Attempt simple test write during startup
-    - Log clear diagnostic message if LCD fails
-    - Consider fallback mode if only LCD fails but DHT works    
-
 """
+
 import sys
 import os
 from src.pitherm.logger import logger
