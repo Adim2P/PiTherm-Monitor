@@ -20,7 +20,9 @@ def load_ini():
         _config["thresholds"] = {
             "temp_high": "25.0",
             "temp_low": "19.0",
-            "hysteresis": "1.0"
+            "hysteresis": "1.0",
+            "humidity_low": "40.0",
+            "humidity_high": "60.0",
         }
 
         _config["intervals"] = {
@@ -70,6 +72,12 @@ TEMP_THRESHOLD_HIGH = float(
 TEMP_THRESHOLD_LOW = float(
     _config["thresholds"]["temp_low"]
 )
+HUMIDITY_THRESHOLD_LOW = float(
+    _config["thresholds"]["humidity_low"]
+)
+HUMIDITY_THRESHOLD_HIGH = float(
+    _config["thresholds"]["humidity_high"]
+)
 READ_INTERVAL_SECONDS = int(
     _config["intervals"]["read_seconds"]
 )
@@ -91,7 +99,6 @@ SMTP_REQUIRED_ENV_VARS = [
     "SMTP_FROM",
     "SMTP_RECIPIENT",
 ]
-
 TEMP_MIN_VALID = float(
     _config["validation"]["temp_min_valid"]
 )
@@ -161,6 +168,10 @@ def validate_env():
 def print_config():
     logger.info(
         f"[CONFIG] High= {TEMP_THRESHOLD_HIGH}, Low={TEMP_THRESHOLD_LOW}"
+    )
+    logger.info(
+        f"[CONFIG] Humidity Optimal = "
+        f"{HUMIDITY_THRESHOLD_LOW}% - {HUMIDITY_THRESHOLD_HIGH}%"
     )
     logger.info(
         f"[CONFIG] Hysteresis= {TEMP_HYSTERESIS}"
