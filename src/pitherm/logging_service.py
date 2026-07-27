@@ -39,9 +39,9 @@ def build_excel_row(temp, hum, now=None):
         now.strftime("%Y-%m-%d"),
         now.strftime("%H:%M:%S"),
         temp,
-        get_temperature_remark,
+        get_temperature_remark(temp),
         hum,
-        get_humidity_remark
+        get_humidity_remark(hum)
     ]
 
 def get_temperature_remark(temperature):
@@ -85,8 +85,6 @@ def find_weekly_report_file(week_str):
     return None
 
 def log_to_csv_fallback(temp, hum):
-    temperature_remark = get_temperature_remark(temp)
-    humidity_remark = get_humidity_remark(hum)
 
     ensure_log_directories()
 
@@ -133,9 +131,6 @@ def archive_old_logs():
                 logger.info(f"[ARCHIVE] Moved {file} to archive.")
 
 def log_to_excel(temp, hum):
-
-    temperature_remark = get_temperature_remark(temp)
-    humidity_remark = get_humidity_remark(hum)
 
     ensure_log_directories()
 
