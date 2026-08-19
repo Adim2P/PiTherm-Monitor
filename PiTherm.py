@@ -1,14 +1,6 @@
 """
 TODO: Priority to Implement
 
-[ ] Implement graceful manual shutdown
-    - Handle SIGTERM and SIGINT
-    - Add a shutdown flag/event checked by the main loop
-    - Replace long blocking sleep with interruptible waiting
-    - Save runtime_state.json before exit
-    - Log shutdown request and successful shutdown
-    - Ensure repeated stop requests do not corrupt state
-
 [ ] Implement SSH-safe manual start
     - Create a control.py start command
     - Launch PiTherm as a detached background process
