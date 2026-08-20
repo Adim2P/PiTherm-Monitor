@@ -1,6 +1,10 @@
 """
 TODO: Priority to Implement
 
+!BUG
+
+[ ] Fix runtime log getting multiple copies instead of only one
+
 [ ] Implement SSH-safe manual start
     - Create a control.py start command
     - Launch PiTherm as a detached background process
