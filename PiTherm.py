@@ -1,6 +1,14 @@
 """
 TODO: Priority to Implement
 
+[ ] Validate PiTherm startup from control.py
+    - Wait briefly after launching PiTherm
+    - Confirm the child PID is still running
+    - Confirm the PID belongs to PiTherm.py
+    - Remove the PID file if startup fails
+    - Report startup failure instead of reporting success
+    - Direct user to control.log for startup errors
+
 [ ] Implement PiTherm watchdog and automatic recovery
     - Add a lightweight health/heartbeat state for the monitoring worker
     - Record the timestamp of the last successfully completed monitoring cycle
