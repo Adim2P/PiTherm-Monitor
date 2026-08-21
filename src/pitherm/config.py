@@ -20,7 +20,9 @@ def load_ini():
         _config["thresholds"] = {
             "temp_high": "25.0",
             "temp_low": "19.0",
-            "hysteresis": "1.0"
+            "hysteresis": "1.0",
+            "humidity_low": "40.0",
+            "humidity_high": "60.0",
         }
 
         _config["intervals"] = {
@@ -42,6 +44,10 @@ def load_ini():
             "max_humidity_jump": "25.0"
         }
 
+        _config["development"] = {
+            "allow_fake_hardware": "false"
+        }
+
         with open(CONFIG_FILE, "w") as f:
             _config.write(f)
     
@@ -59,16 +65,22 @@ SMTP_CC = os.getenv("SMTP_CC")
 SMTP_FROM = os.getenv("SMTP_FROM")
 SMTP_HOST = os.getenv("SMTP_HOST")
 SMTP_PORT = os.getenv("SMTP_PORT")
-ALLOW_FAKE_HARDWARE = os.getenv("ALLOW_FAKE_HARDWARE", "").strip().lower() in (
-    "1",
-    "true",
-    "yes",
+ALLOW_FAKE_HARDWARE = _config.getboolean(
+    "development",
+    "allow_fake_hardware",
+    fallback=False,
 )
 TEMP_THRESHOLD_HIGH = float(
     _config["thresholds"]["temp_high"]
 )
 TEMP_THRESHOLD_LOW = float(
     _config["thresholds"]["temp_low"]
+)
+HUMIDITY_THRESHOLD_LOW = float(
+    _config["thresholds"]["humidity_low"]
+)
+HUMIDITY_THRESHOLD_HIGH = float(
+    _config["thresholds"]["humidity_high"]
 )
 READ_INTERVAL_SECONDS = int(
     _config["intervals"]["read_seconds"]
@@ -91,7 +103,6 @@ SMTP_REQUIRED_ENV_VARS = [
     "SMTP_FROM",
     "SMTP_RECIPIENT",
 ]
-
 TEMP_MIN_VALID = float(
     _config["validation"]["temp_min_valid"]
 )
@@ -161,6 +172,10 @@ def validate_env():
 def print_config():
     logger.info(
         f"[CONFIG] High= {TEMP_THRESHOLD_HIGH}, Low={TEMP_THRESHOLD_LOW}"
+    )
+    logger.info(
+        f"[CONFIG] Humidity Optimal = "
+        f"{HUMIDITY_THRESHOLD_LOW}% - {HUMIDITY_THRESHOLD_HIGH}%"
     )
     logger.info(
         f"[CONFIG] Hysteresis= {TEMP_HYSTERESIS}"

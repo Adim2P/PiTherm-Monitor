@@ -1,4 +1,5 @@
 import time
+import threading
 from src.pitherm.config import (
     TEMP_THRESHOLD_HIGH,
     TEMP_THRESHOLD_LOW,
@@ -20,7 +21,7 @@ class Monitor:
         self.hardware = hardware
         self.validator = SensorValidator()
         self._last_log_time = 0
-        self._running = True
+        self._shutdown_event = threading.Event()
         self.alert_sent_high = state.get(
             "alert_sent_high",
             False
@@ -123,7 +124,7 @@ class Monitor:
         logger.info("[START] Monitoring Started. Press Ctrl + C to stop.")
 
         try:
-            while self._running:
+            while not self._shutdown_event.is_set():
                 try:
                     temperature, humidity = self.hardware.read_sensor()
 
@@ -160,7 +161,7 @@ class Monitor:
                 except RuntimeError as err:
                     logger.error(f"DHT read error: {err}")
                 
-                time.sleep(READ_INTERVAL_SECONDS)
+                self._shutdown_event.wait(READ_INTERVAL_SECONDS)
 
         except KeyboardInterrupt:
             logger.info("\n[STOP] Monitoring stopped by user.")
@@ -176,4 +177,4 @@ class Monitor:
 
     def stop(self):
         logger.info("[STOP] Shutdown signal received.")
-        self._running = False
+        self._shutdown_event.set()

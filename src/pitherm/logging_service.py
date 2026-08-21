@@ -11,11 +11,56 @@ import csv
 import shutil
 from src.pitherm.logger import logger
 from src.pitherm.state_manager import state
+from src.pitherm.config import (
+    TEMP_THRESHOLD_HIGH,
+    TEMP_THRESHOLD_LOW,
+    HUMIDITY_THRESHOLD_HIGH,
+    HUMIDITY_THRESHOLD_LOW
+)
 
 _excel_lock = threading.Lock()
 BASE_LOG_DIR = "logs"
 CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
 ARCHIVE_DIR = os.path.join(BASE_LOG_DIR, "archive")
+REPORT_HEADERS = [
+    "Date",
+    "Time",
+    "Temperature (°C)",
+    "Temperature Remark",
+    "Humidity (%)",
+    "Humidity Remark"
+]
+
+def build_excel_row(temp, hum, now=None):
+    if now is None:
+        now = datetime.now()
+
+    return [
+        now.strftime("%Y-%m-%d"),
+        now.strftime("%H:%M:%S"),
+        temp,
+        get_temperature_remark(temp),
+        hum,
+        get_humidity_remark(hum)
+    ]
+
+def get_temperature_remark(temperature):
+    if temperature >= TEMP_THRESHOLD_HIGH:
+        return "High"
+    
+    if temperature <= TEMP_THRESHOLD_LOW:
+        return "Low"
+    
+    return "Normal"
+
+def get_humidity_remark(humidity):
+    if humidity >= HUMIDITY_THRESHOLD_HIGH:
+        return "High"
+    
+    if humidity <= HUMIDITY_THRESHOLD_LOW:
+        return "Low"
+    
+    return "Normal"
 
 def get_week_str(dt):
     year, week, _ = dt.isocalendar()
@@ -40,6 +85,7 @@ def find_weekly_report_file(week_str):
     return None
 
 def log_to_csv_fallback(temp, hum):
+
     ensure_log_directories()
 
     week_str = get_week_str(datetime.now())
@@ -52,19 +98,10 @@ def log_to_csv_fallback(temp, hum):
         writer = csv.writer(file)
 
         if not file_exists:
-            writer.writerow([
-                "Date", 
-                "Time", 
-                "Temperature (°C)", 
-                "Humidity (%)"
-            ])
+            writer.writerow(REPORT_HEADERS)
 
-        writer.writerow([
-            now.strftime("%Y-%m-%d"),
-            now.strftime("%H:%M:%S"),
-            temp,
-            hum
-        ])
+        writer.writerow(build_excel_row(temp, hum))
+        
     logger.warning("[FALLBACK] Logged reading to CSV.")
 
 def ensure_log_directories():
@@ -94,6 +131,7 @@ def archive_old_logs():
                 logger.info(f"[ARCHIVE] Moved {file} to archive.")
 
 def log_to_excel(temp, hum):
+
     ensure_log_directories()
 
     with _excel_lock:
@@ -110,16 +148,11 @@ def log_to_excel(temp, hum):
                 wb = Workbook()
                 ws = get_active_sheet(wb)
                 ws.title = "Weekly Readings"
-                ws.append(["Date", "Time", "Temperature (°C)", "Humidity (%)"])
-                for col in range(1, 5):
+                ws.append(REPORT_HEADERS)
+                for col in range(1, 7):
                     ws[f"{get_column_letter(col)}1"].font = Font(bold=True)
             now = datetime.now()
-            ws.append([
-                now.strftime("%Y-%m-%d"), 
-                now.strftime("%H:%M:%S"), 
-                temp, 
-                hum
-            ])
+            ws.append(build_excel_row(temp, hum))
             wb.save(filename)
         except Exception as e:
             logger.error(

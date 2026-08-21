@@ -1,64 +1,48 @@
 """
 TODO: Priority to Implement
-    
-[ ] To add another column on excel weekly, remarks that says
-    (normal, high or low temps), Humidity checker as well
-    (40 - 60 optimal, below 40 or higher than 60 is a warning)
 
-[ ] Implement automatic systemd service registration (Linux only)
-    - Dynamically generate pitherm.service
-    - Set WorkingDirectory to project root
-    - Use venv Python binary in ExecStart
-    - Enable service on boot
-    - Start service immediately after install
-    - Configure Restart=always and RestartSec=5
-    - Validate service status after registration
+[ ] Implement PiTherm watchdog and automatic recovery
+    - Add a lightweight health/heartbeat state for the monitoring worker
+    - Record the timestamp of the last successfully completed monitoring cycle
+    - Record the timestamp of the last successful Adafruit upload separately
+    - Keep watchdog health data separate from runtime_state.json
+    - Detect when the monitoring loop has stopped updating for too long
+    - Distinguish a frozen worker from a temporary Adafruit/network failure
+    - Restart PiTherm automatically when the worker heartbeat becomes stale
+    - Use the existing control/start/stop logic for recovery where possible
+    - Wait for a successful heartbeat after restart before marking recovery complete
+    - Log watchdog-triggered restarts and the reason for recovery
+    - Add restart backoff to prevent rapid restart loops
+    - Stop automatic recovery after repeated failures within a short period
+    - Send an SMTP notification when automatic recovery succeeds
+    - Send a critical SMTP notification when repeated recovery attempts fail
 
-[ ] Implement CI/CD Pipeline
+[ ] Implement scheduled weekly restart
+    - Restart PiTherm automatically every Saturday
+    - Make the restart time configurable
+    - Ensure the scheduled restart only happens once per Saturday
+    - Perform a graceful stop before starting the worker again
+    - Preserve runtime_state.json across the restart
+    - Confirm the new worker is healthy before reporting success
+    - Send an SMTP notification after a successful scheduled restart
 
-[ ] Implement clean uninstall capability
-    - Stop running service
-    - Disable service from startup
-    - Remove /etc/systemd/system/pitherm.service
-    - Reload systemd daemon
-    - Remove virtual environment (venv)
-    - Ensure no leftover files or processes remain
+[ ] Refactor runtime logging to daily log rotation
+    - Replace size-based RotatingFileHandler with TimedRotatingFileHandler
+    - Keep runtime.log as the active log file for the current day
+    - Rotate runtime.log automatically at midnight
+    - Rename rotated logs using the previous day's date
+    - Use a clear date-based filename format such as runtime_YYYY-MM-DD.log
+    - Keep daily logs separate to make error investigation easier
+    - Configure how many historical daily logs should be retained
+    - Ensure logging continues cleanly after midnight rotation
+    - Verify rotation behavior on both Windows and Raspberry Pi/Linux
+    - Confirm existing runtime.log data is preserved during migration
 
 [ ] Implement Dashboard after Persistent Flag States using local
     native UI
 
-------------------------------------------------------------
-
-TODO: When main installer Implementation is done
-
-[ ] Implement sensor failure detection
-    - Track consecutive failed reads
-    - Define MAX_SENSOR_FAILURE threshold
-    - Trigger hardware failure alert via new API
-    - Send alert only once per failure event
-    - Reset failure counter after successful sensor read
-
-[ ] Improve DHT hardware self-test robustness
-    - Retry initial sensor read 2–3 times before failing
-    - Add small delay between retries
-    - Log retry attempts during initialization
-    - Only enter dev mode if all retries fail
-
-[ ] Logging health monitoring
-
-    - Track excel_faulted state
-    - Track last successful Excel write
-    - Alert when entering fallback mode
-    - Alert when Excel logging recovers
-    - Send only once per state change
-
-[ ] Improve LCD initialization validation
-    - Detect I2C initialization failure explicitly
-    - Attempt simple test write during startup
-    - Log clear diagnostic message if LCD fails
-    - Consider fallback mode if only LCD fails but DHT works    
-
 """
+
 import sys
 import os
 from src.pitherm.logger import logger
