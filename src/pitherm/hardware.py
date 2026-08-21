@@ -41,12 +41,6 @@ class HardwareController:
 
             self.lcd = CharLCD('PCF8574', 0x27)
 
-            test_temp = self.dht_device.temperature
-            test_hum = self.dht_device.humidity
-
-            if test_temp is None or test_hum is None:
-                raise RuntimeError("Initial DHT read returned None")
-
             self.lcd.clear()
             self.lcd.write_string("PiTherm Ready")
 
@@ -94,10 +88,19 @@ class HardwareController:
             lcd.write_string(f"Hum : {hum:.2f}%")
 
     def cleanup(self):
-        lcd = self.lcd
-        dht_device = self.dht_device
+        if self.lcd is not None:
+            try:
+                self.lcd.clear()
+            except Exception:
+                pass
 
-        if self.hardware_ready and lcd is not None and dht_device is not None:
-            lcd.clear()
+        try:
             GPIO.cleanup()
-            dht_device.exit()
+        except Exception:
+            pass
+
+        if self.dht_device is not None:
+            try:
+                self.dht_device.exit()
+            except Exception:
+                pass
