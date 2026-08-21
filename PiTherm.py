@@ -1,30 +1,42 @@
 """
 TODO: Priority to Implement
 
-!BUG
+[ ] Implement PiTherm watchdog and automatic recovery
+    - Add a lightweight health/heartbeat state for the monitoring worker
+    - Record the timestamp of the last successfully completed monitoring cycle
+    - Record the timestamp of the last successful Adafruit upload separately
+    - Keep watchdog health data separate from runtime_state.json
+    - Detect when the monitoring loop has stopped updating for too long
+    - Distinguish a frozen worker from a temporary Adafruit/network failure
+    - Restart PiTherm automatically when the worker heartbeat becomes stale
+    - Use the existing control/start/stop logic for recovery where possible
+    - Wait for a successful heartbeat after restart before marking recovery complete
+    - Log watchdog-triggered restarts and the reason for recovery
+    - Add restart backoff to prevent rapid restart loops
+    - Stop automatic recovery after repeated failures within a short period
+    - Send an SMTP notification when automatic recovery succeeds
+    - Send a critical SMTP notification when repeated recovery attempts fail
 
-[ ] Fix runtime log getting multiple copies instead of only one
+[ ] Implement scheduled weekly restart
+    - Restart PiTherm automatically every Saturday
+    - Make the restart time configurable
+    - Ensure the scheduled restart only happens once per Saturday
+    - Perform a graceful stop before starting the worker again
+    - Preserve runtime_state.json across the restart
+    - Confirm the new worker is healthy before reporting success
+    - Send an SMTP notification after a successful scheduled restart
 
-[ ] Implement SSH-safe manual start
-    - Create a control.py start command
-    - Launch PiTherm as a detached background process
-    - Use the project virtual environment Python binary
-    - Redirect stdout and stderr to log files
-    - Ensure PiTherm continues running after SSH logout
-    - Store the running process PID
-    - Prevent duplicate PiTherm instances
-    - Confirm that the process started successfully
-
-[ ] Implement manual stop and status commands
-    - Add control.py stop
-    - Read the stored PID
-    - Verify that the PID belongs to PiTherm
-    - Send SIGTERM for graceful shutdown
-    - Wait for the process to exit
-    - Remove stale PID files
-    - Add control.py status
-    - Show whether PiTherm is running
-    - Show PID and last known runtime state
+[ ] Refactor runtime logging to daily log rotation
+    - Replace size-based RotatingFileHandler with TimedRotatingFileHandler
+    - Keep runtime.log as the active log file for the current day
+    - Rotate runtime.log automatically at midnight
+    - Rename rotated logs using the previous day's date
+    - Use a clear date-based filename format such as runtime_YYYY-MM-DD.log
+    - Keep daily logs separate to make error investigation easier
+    - Configure how many historical daily logs should be retained
+    - Ensure logging continues cleanly after midnight rotation
+    - Verify rotation behavior on both Windows and Raspberry Pi/Linux
+    - Confirm existing runtime.log data is preserved during migration
 
 [ ] Implement Dashboard after Persistent Flag States using local
     native UI
