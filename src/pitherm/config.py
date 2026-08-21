@@ -3,56 +3,84 @@ import sys
 from dotenv import load_dotenv
 import configparser
 from src.pitherm.logger import logger
+from pathlib import Path
 
 # ENVs
 
 load_dotenv()
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-CONFIG_FILE = os.path.join(BASE_DIR, "config.ini")
+BASE_DIR = Path(__file__).resolve().parents[2]
+CONFIG_FILE = BASE_DIR / "config.ini"
+DEFAULT_CONFIG = {
+    "thresholds": {
+        "temp_high": "25.0",
+        "temp_low": "19.0",
+        "humidity_low": "40.0",
+        "humidity_high": "60.0",
+        "hysteresis": "1.0"
+    },
+
+    "intervals": {
+        "read_seconds": "30",
+        "log_seconds": "300",
+    },
+
+    "alerts": {
+        "daily_alert_time": "09:00",
+        "email_enabled": "false",
+    },
+
+    "validation": {
+        "temp_min_valid": "0.0",
+        "temp_max_valid": "60.0",
+        "humidity_min_valid": "0.0",
+        "humidity_max_valid": "100.0",
+        "max_temp_jump": "8.0",
+        "max_humidity_jump": "25.0",
+    },
+
+    "development": {
+        "allow_fake_hardware": "false",
+    },
+}
 
 _config = configparser.ConfigParser()
 
 def load_ini():
-    if not os.path.exists(CONFIG_FILE):
-        logger.info("[INFO] config.ini not found. Creating default config.")
+    config_changed = False
 
-        _config["thresholds"] = {
-            "temp_high": "25.0",
-            "temp_low": "19.0",
-            "hysteresis": "1.0",
-            "humidity_low": "40.0",
-            "humidity_high": "60.0",
-        }
-
-        _config["intervals"] = {
-            "read_seconds": "30",
-            "log_seconds": "300"
-        }
-
-        _config["alerts"] = {
-            "daily_alert_time": "09:00",
-            "email_enabled": "true"
-        }
-
-        _config["validation"] = {
-            "temp_min_valid": "0.0",
-            "temp_max_valid": "60.0",
-            "humidity_min_valid": "0.0",
-            "humidity_max_valid": "100.0",
-            "max_temp_jump": "8.0",
-            "max_humidity_jump": "25.0"
-        }
-
-        _config["development"] = {
-            "allow_fake_hardware": "false"
-        }
-
-        with open(CONFIG_FILE, "w") as f:
-            _config.write(f)
-    
-    else:
+    if CONFIG_FILE.exists():
         _config.read(CONFIG_FILE)
+    else:
+        logger.info(
+            "[CONFIG] config.ini not found. "
+            "Creating default configuration."
+        )
+        config_changed = True
+
+    for section, values in DEFAULT_CONFIG.items():
+        if not _config.has_section(section):
+            _config.add_section(section)
+            config_changed = True
+
+        for key, default_value in values.items():
+            if key not in _config[section]:
+                _config[section][key] = default_value
+                config_changed = True
+
+                logger.info(
+                    f"[CONFIG] Added missing setting: "
+                    f"{section}.{key}={default_value}"
+                )
+
+    if config_changed:
+        with CONFIG_FILE.open(
+            "w",
+            encoding="utf-8"
+        ) as config_file:
+            _config.write(config_file)
+
+    return _config
 
 load_ini()
 
@@ -89,7 +117,7 @@ LOG_INTERVAL_SECONDS = int(
     _config["intervals"]["log_seconds"]
 )
 TEMP_HYSTERESIS = float(
-_config["thresholds"]["hysteresis"]
+    _config["thresholds"]["hysteresis"]
 )
 DAILY_ALERT_TIME = _config["alerts"]["daily_alert_time"]
 EMAIL_ENABLED = _config["alerts"]["email_enabled"].lower() in (
