@@ -44,6 +44,10 @@ def load_ini():
             "max_humidity_jump": "25.0"
         }
 
+        _config["development"] = {
+            "allow_fake_hardware": "false"
+        }
+
         with open(CONFIG_FILE, "w") as f:
             _config.write(f)
     
@@ -61,10 +65,10 @@ SMTP_CC = os.getenv("SMTP_CC")
 SMTP_FROM = os.getenv("SMTP_FROM")
 SMTP_HOST = os.getenv("SMTP_HOST")
 SMTP_PORT = os.getenv("SMTP_PORT")
-ALLOW_FAKE_HARDWARE = os.getenv("ALLOW_FAKE_HARDWARE", "").strip().lower() in (
-    "1",
-    "true",
-    "yes",
+ALLOW_FAKE_HARDWARE = _config.getboolean(
+    "development",
+    "allow_fake_hardware",
+    fallback=False,
 )
 TEMP_THRESHOLD_HIGH = float(
     _config["thresholds"]["temp_high"]
