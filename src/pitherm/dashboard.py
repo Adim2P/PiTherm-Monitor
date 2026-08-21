@@ -3,10 +3,11 @@ from src.pitherm.config import (
     ADAFRUIT_IO_USERNAME,
     ADAFRUIT_IO_KEY
 )
+from src.pitherm.logger import logger
 
 def send_to_adafruit(temp, hum):
     if not ADAFRUIT_IO_KEY or not ADAFRUIT_IO_USERNAME:
-        print("[WARN] Adafruit IO not configured. Upload skipped.")
+        logger.warning("Adafruit IO not configured. Upload skipped.")
         return
 
     try:
@@ -22,9 +23,12 @@ def send_to_adafruit(temp, hum):
         hum_res = requests.post(hum_url, headers=headers, json={"value": hum}, timeout=5)
 
         if temp_res.status_code == 200 and hum_res.status_code == 200:
-            print("[UPLOAD] Data sent to Adafruit IO.")
+            logger.info("[UPLOAD] Data sent to Adafruit IO.")
         else:
-            print(f"[WARN] Adafruit error: {temp_res.text} | {hum_res.text}")
+            logger.warning(f"Adafruit error: {temp_res.text} | {hum_res.text}")
 
     except Exception as err:
-        print("[ERROR] Adafruit exception:", err)
+        logger.error(
+            f"Adafruit exception: {err}", 
+            exc_info=True
+        )

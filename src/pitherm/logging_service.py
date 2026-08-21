@@ -1,24 +1,96 @@
 import os
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font
 from src.pitherm.smtp_client import SMTPClient
 from email.mime.application import MIMEApplication
 import csv
+import shutil
+from src.pitherm.logger import logger
+from src.pitherm.state_manager import state
+from src.pitherm.config import (
+    TEMP_THRESHOLD_HIGH,
+    TEMP_THRESHOLD_LOW,
+    HUMIDITY_THRESHOLD_HIGH,
+    HUMIDITY_THRESHOLD_LOW
+)
 
-_last_report_month = None
 _excel_lock = threading.Lock()
 BASE_LOG_DIR = "logs"
 CURRENT_DIR = os.path.join(BASE_LOG_DIR, "current")
 ARCHIVE_DIR = os.path.join(BASE_LOG_DIR, "archive")
+REPORT_HEADERS = [
+    "Date",
+    "Time",
+    "Temperature (°C)",
+    "Temperature Remark",
+    "Humidity (%)",
+    "Humidity Remark"
+]
+
+def build_excel_row(temp, hum, now=None):
+    if now is None:
+        now = datetime.now()
+
+    return [
+        now.strftime("%Y-%m-%d"),
+        now.strftime("%H:%M:%S"),
+        temp,
+        get_temperature_remark(temp),
+        hum,
+        get_humidity_remark(hum)
+    ]
+
+def get_temperature_remark(temperature):
+    if temperature >= TEMP_THRESHOLD_HIGH:
+        return "High"
+    
+    if temperature <= TEMP_THRESHOLD_LOW:
+        return "Low"
+    
+    return "Normal"
+
+def get_humidity_remark(humidity):
+    if humidity >= HUMIDITY_THRESHOLD_HIGH:
+        return "High"
+    
+    if humidity <= HUMIDITY_THRESHOLD_LOW:
+        return "Low"
+    
+    return "Normal"
+
+def get_week_str(dt):
+    year, week, _ = dt.isocalendar()
+    return f"{year}_W{week:02d}"
+
+def get_active_sheet(workbook):
+    worksheet = workbook.active
+
+    if worksheet is None:
+        worksheet = workbook.create_sheet()
+
+    return worksheet
+
+def find_weekly_report_file(week_str):
+    filename = f"temp_log_{week_str}.xlsx"
+
+    for directory in (CURRENT_DIR, ARCHIVE_DIR):
+        path = os.path.join(directory, filename)
+        if os.path.exists(path):
+            return path
+
+    return None
 
 def log_to_csv_fallback(temp, hum):
+
     ensure_log_directories()
 
-    fallback_file = os.path.join(CURRENT_DIR, "fallback_log.csv")
+    week_str = get_week_str(datetime.now())
+
+    fallback_file = os.path.join(CURRENT_DIR, f"fallback_{week_str}.csv")
     now = datetime.now()
     file_exists = os.path.exists(fallback_file)
 
@@ -26,20 +98,11 @@ def log_to_csv_fallback(temp, hum):
         writer = csv.writer(file)
 
         if not file_exists:
-            writer.writerow([
-                "Date", 
-                "Time", 
-                "Temperature (°C)", 
-                "Humidity (%)"
-            ])
+            writer.writerow(REPORT_HEADERS)
 
-            writer.writerow([
-                now.strftime("%Y-%m-%d"),
-                now.strftime("%H:%M:%S"),
-                temp,
-                hum
-            ])
-    print("[FALLBACK] Logged reading to CSV.")
+        writer.writerow(build_excel_row(temp, hum))
+        
+    logger.warning("[FALLBACK] Logged reading to CSV.")
 
 def ensure_log_directories():
     os.makedirs(CURRENT_DIR, exist_ok=True)
@@ -48,65 +111,73 @@ def ensure_log_directories():
 def archive_old_logs():
     ensure_log_directories()
 
-    current_month = datetime.now().strftime("%Y-%m")
+    current_week_str = get_week_str(datetime.now())
 
     for file in os.listdir(CURRENT_DIR):
-        if file.startswith("temp_log_") and file.endswith(".xlsx"):
-            file_month = file.replace("temp_log_", "").replace(".xlsx", "")
+        if (
+            (file.startswith("temp_log_") and file.endswith(".xlsx")) or
+            (file.startswith("fallback_") and file.endswith(".csv"))
+        ):
+            if file.startswith("temp_log_"):
+                file_week = file.replace("temp_log_", "").replace(".xlsx", "")
+            else:
+                file_week = file.replace("fallback_", "").replace(".csv", "")
 
-            if file_month != current_month:
+            if file_week != current_week_str:
                 src_path = os.path.join(CURRENT_DIR, file)
                 dst_path = os.path.join(ARCHIVE_DIR, file)
 
-                if not os.path.exists(dst_path):
-                    os.rename(src_path, dst_path)
-                    print(f"[ARCHIVE] Moved {file} to archive.")
+                shutil.move(src_path, dst_path)
+                logger.info(f"[ARCHIVE] Moved {file} to archive.")
 
 def log_to_excel(temp, hum):
+
     ensure_log_directories()
-    
 
     with _excel_lock:
         archive_old_logs()
 
-        date_str = datetime.now().strftime("%Y-%m")
-        filename = os.path.join(CURRENT_DIR, f"temp_log_{date_str}.xlsx")
-    
+        week_str = get_week_str(datetime.now())
+        filename = os.path.join(CURRENT_DIR, f"temp_log_{week_str}.xlsx")
+
         try:
             try:
                 wb = load_workbook(filename)
-                ws = wb.active
+                ws = get_active_sheet(wb)
             except FileNotFoundError:
                 wb = Workbook()
-                ws = wb.active
-                ws.title = "Monthly Readings"
-                ws.append(["Date", "Time", "Temperature (°C)", "Humidity (%)"])
-                for col in range(1, 5):
+                ws = get_active_sheet(wb)
+                ws.title = "Weekly Readings"
+                ws.append(REPORT_HEADERS)
+                for col in range(1, 7):
                     ws[f"{get_column_letter(col)}1"].font = Font(bold=True)
             now = datetime.now()
-            ws.append([
-                now.strftime("%Y-%m-%d"), 
-                now.strftime("%H:%M:%S"), 
-                temp, 
-                hum
-            ])
+            ws.append(build_excel_row(temp, hum))
             wb.save(filename)
         except Exception as e:
-            print("[CRITICAL] Excel logging failed. Switching to CSV Fallback:", e)
+            logger.error(
+                f"Excel logging failed. Switching to CSV Fallback: {e}", 
+                exc_info=True
+            )
             log_to_csv_fallback(temp, hum)
 
-def send_monthly_report():
+def send_weekly_report(now=None, sender=None):
+    if now is None:
+        now = datetime.now()
+
     with _excel_lock:
-        month_str = datetime.now().strftime("%Y-%m")
-        filename = os.path.join(CURRENT_DIR, f"temp_log_{month_str}.xlsx")
+        report_date = now - timedelta(days=7)
+        week_str = get_week_str(report_date)
+        filename = find_weekly_report_file(week_str)
 
-    if not os.path.exists(filename):
-        print("[WARN] No Excel File to send.")
-        return
+    if filename is None:
+        logger.warning(f"No Excel file to send for {week_str}.")
+        return False
 
-    subject = f"Monthly Temp Report - {month_str}"
+    subject = f"Weekly Temp Report - {week_str}"
+    logger.info(f"[REPORT] Sending weekly report for {week_str}.")
     body = f"""
-    <p>Attached is the temperature and humidity log for {month_str}.</p>
+    <p>Attached is the temperature and humidity log for {week_str}.</p>
     <p>- Raspberry Pi Monitor</p>
     """
 
@@ -118,31 +189,55 @@ def send_monthly_report():
         attachment.add_header(
             'Content-Disposition',
             'attachment',
-            filename=filename
+            filename=os.path.basename(filename)
         )
+
+    if sender is None:
+        sender = SMTPClient()
     
-    SMTPClient().send(
+    sent = sender.send(
         subject, 
         body, 
         is_html=True, 
         attachment=attachment
     )
 
-    return body #temporary
+    if sent:
+        logger.info(f"[REPORT] Weekly report sent for {week_str}.")
 
-def check_and_send_monthly_report():
-    global _last_report_month
+    return sent
 
-    now = datetime.now()
-    current_month = now.strftime("%Y-%m")
+def check_and_send_weekly_report(now=None, sender=None):
+    if now is None:
+        now = datetime.now()
 
-    if now.day == 1 and now.hour >= 7 and _last_report_month != current_month:
-            send_monthly_report()
-            _last_report_month = current_month
+    current_week = list(now.isocalendar()[:2])
+
+    last_report_week =  state.get(
+        "last_report_week"
+    )
+
+    if (
+        now.weekday() == 0
+        and now.hour >= 7
+        and last_report_week != current_week
+    ):
+        if send_weekly_report(
+            now=now,
+            sender=sender
+        ):
+            state.set(
+                "last_report_week",
+                current_week
+            )
+
+            logger.info(
+                f"[STATE] Stored weekly report state: {current_week}"
+            )
 
 def run_scheduler():
     while True:
-        check_and_send_monthly_report()
+        check_and_send_weekly_report()
         time.sleep(60)
 
 def start_scheduler():

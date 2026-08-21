@@ -4,3 +4,6 @@ pycache/
 .env
 .vscode/
 logs/
+config.ini
+.env.backup
+data/
