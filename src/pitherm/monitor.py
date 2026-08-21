@@ -168,6 +168,7 @@ class Monitor:
 
         finally:
             self.hardware.cleanup()
+            logger.info("[STOP] Hardware cleanup completed.")
 
     def _is_time_for_daily_alert(self):
         now = datetime.now()
