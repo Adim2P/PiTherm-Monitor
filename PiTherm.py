@@ -3,6 +3,12 @@ TODO: Priority to Implement
 
 [ ] Fix Excel formatting, to compact spaces in cells? (Auto fit)
 
+[ ] State flag for sent weekly, in case if SMTP goes into timeout
+    and fails to send weekly report or daily. If temp alert didn't
+    go through, it's best to let the main loop check for temp again
+    just in case if it's low or high. (Make sure this works everyday
+    until it actually works.)
+
 [ ] Validate PiTherm startup from control.py
     - Wait briefly after launching PiTherm
     - Confirm the child PID is still running
