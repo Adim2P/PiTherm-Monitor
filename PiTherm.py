@@ -1,6 +1,8 @@
 """
 TODO: Priority to Implement
 
+[ ] Fix Excel formatting, to compact spaces in cells? (Auto fit)
+
 [ ] Validate PiTherm startup from control.py
     - Wait briefly after launching PiTherm
     - Confirm the child PID is still running
