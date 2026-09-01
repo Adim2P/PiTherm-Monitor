@@ -9,6 +9,10 @@ TODO: Priority to Implement
     just in case if it's low or high. (Make sure this works everyday
     until it actually works.)
 
+[ ] Current Bug with SMTP send if previous week file has failed sending,
+    need to implement state flag for unsent email for last week to be sent
+    as soon as possible as SMTP becomes available
+
 [ ] Validate PiTherm startup from control.py
     - Wait briefly after launching PiTherm
     - Confirm the child PID is still running
