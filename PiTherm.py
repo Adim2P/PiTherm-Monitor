@@ -1,17 +1,23 @@
 """
 TODO: Priority to Implement
 
-[ ] Fix Excel formatting, to compact spaces in cells? (Auto fit)
+[ ] BUG: Runtime.log still duplicates, would implement daily runtime
+    log instead, archiving previous daily runtime for new one.
 
-[ ] State flag for sent weekly, in case if SMTP goes into timeout
-    and fails to send weekly report or daily. If temp alert didn't
-    go through, it's best to let the main loop check for temp again
-    just in case if it's low or high. (Make sure this works everyday
-    until it actually works.)
+[ ] Feature: Implement Preferred Excel Formatting (Auto Width, Border, 
+    and Bold Columns)
 
-[ ] Current Bug with SMTP send if previous week file has failed sending,
-    need to implement state flag for unsent email for last week to be sent
-    as soon as possible as SMTP becomes available
+[ ] Feature: Add persistent state tracking for weekly Excel reports and daily alerts.
+    If SMTP is unavailable or times out, record which reports/alerts failed to send. 
+    Once SMTP connectivity is restored, automatically send all missed items along with 
+    the current scheduled report.
+    Example: If weekly reports for Weeks 35 and 36 fail, the Week 37 Monday email should 
+    include Weeks 35, 36, and 37.
+
+[ ] BUG: If previous excel week has failed, it would try to send the
+    previous week's file for the week it should be supposed to send.
+    (e.g. if 35th Week has failed, it would try to send it in 36th,
+    if SMTP has failed. Connnected with issue above.)
 
 [ ] Validate PiTherm startup from control.py
     - Wait briefly after launching PiTherm
