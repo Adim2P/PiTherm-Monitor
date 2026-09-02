@@ -7,17 +7,18 @@ TODO: Priority to Implement
 [ ] Feature: Implement Preferred Excel Formatting (Auto Width, Border, 
     and Bold Columns)
 
-[ ] Feature: Add persistent state tracking for weekly Excel reports and daily alerts.
-    If SMTP is unavailable or times out, record which reports/alerts failed to send. 
-    Once SMTP connectivity is restored, automatically send all missed items along with 
-    the current scheduled report.
-    Example: If weekly reports for Weeks 35 and 36 fail, the Week 37 Monday email should 
-    include Weeks 35, 36, and 37.
-
-[ ] BUG: If previous excel week has failed, it would try to send the
-    previous week's file for the week it should be supposed to send.
-    (e.g. if 35th Week has failed, it would try to send it in 36th,
-    if SMTP has failed. Connnected with issue above.)
+[ ] Feature: Add persistent SMTP delivery state for weekly Excel reports and 
+    temperature alerts.
+    Weekly Excel reports must be queued if SMTP fails and automatically sent 
+    once SMTP becomes available again. All missed weekly reports should be delivered.
+    Temperature alerts should not queue every missed daily reminder. Instead, 
+    track whether the current alert state has been successfully communicated.
+    If SMTP recovers while a high/low temperature condition is still active, 
+    immediately send a fresh alert using the current readings.
+    If the condition recovered while SMTP was unavailable, send a single recovery/update 
+    notification instead of replaying missed alerts.
+    Alert/report delivery state should only be marked successful after SMTP confirms 
+    the email was sent.
 
 [ ] Validate PiTherm startup from control.py
     - Wait briefly after launching PiTherm
